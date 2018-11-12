@@ -37,6 +37,7 @@ import jetbrains.buildServer.serverSide.TriggeredBy;
 import jetbrains.buildServer.serverSide.artifacts.BuildArtifacts;
 import jetbrains.buildServer.serverSide.artifacts.BuildArtifactsViewMode;
 import jetbrains.buildServer.serverSide.artifacts.SArtifactDependency;
+import jetbrains.buildServer.serverSide.auth.AccessDeniedException;
 import jetbrains.buildServer.serverSide.buildLog.BuildLog;
 import jetbrains.buildServer.serverSide.comments.Comment;
 import jetbrains.buildServer.serverSide.impl.RunningBuildState;
@@ -47,19 +48,9 @@ import jetbrains.buildServer.tests.TestInfo;
 import jetbrains.buildServer.users.SUser;
 import jetbrains.buildServer.users.User;
 import jetbrains.buildServer.users.UserSet;
-import jetbrains.buildServer.vcs.CheckoutRules;
-import jetbrains.buildServer.vcs.FilteredVcsChange;
-import jetbrains.buildServer.vcs.RelationType;
-import jetbrains.buildServer.vcs.SVcsModification;
-import jetbrains.buildServer.vcs.SVcsRoot;
-import jetbrains.buildServer.vcs.SelectPrevBuildPolicy;
-import jetbrains.buildServer.vcs.VcsException;
-import jetbrains.buildServer.vcs.VcsFileModification;
-import jetbrains.buildServer.vcs.VcsModification;
-import jetbrains.buildServer.vcs.VcsRootInstance;
-import jetbrains.buildServer.vcs.VcsRootInstanceEntry;
-import jetbrains.buildServer.vcs.VcsRootNotFoundException;
+import jetbrains.buildServer.vcs.*;
 import jetbrains.vcs.api.VcsService;
+import org.jetbrains.annotations.NotNull;
 
 public class MockSRunningBuild implements SRunningBuild {
 
@@ -289,7 +280,13 @@ public class MockSRunningBuild implements SRunningBuild {
 						// TODO Auto-generated method stub
 						return null;
 					}
-					
+
+					@NotNull
+					@Override
+					public VcsRootStatus getStatus() {
+						return null;
+					}
+
 					@Override
 					public String getVcsDisplayName() {
 						// TODO Auto-generated method stub
@@ -354,7 +351,12 @@ public class MockSRunningBuild implements SRunningBuild {
 						// TODO Auto-generated method stub
 						return null;
 					}
-					
+
+					@Override
+					public int getEffectiveModificationCheckInterval() {
+						return 0;
+					}
+
 					@Override
 					public SVcsRoot getParent() {
 						// TODO Auto-generated method stub
@@ -477,6 +479,11 @@ public class MockSRunningBuild implements SRunningBuild {
 				// TODO Auto-generated method stub
 				return null;
 			}
+
+			@Override
+			public void setDescription(@NotNull String s) throws AccessDeniedException {
+
+			}
 		});
 	}
 
@@ -492,6 +499,11 @@ public class MockSRunningBuild implements SRunningBuild {
 
 	public SBuildAgent getAgent() {
 		return sBuildAgent;
+	}
+
+	@Override
+	public int getAgentId() {
+		return 0;
 	}
 
 	public String getAgentAccessCode() {
@@ -1025,5 +1037,10 @@ public class MockSRunningBuild implements SRunningBuild {
 		// TODO Auto-generated method stub
 		return null;
 	}
-	
+
+	@Override
+	public boolean isAgentLessBuild() {
+		return false;
+	}
+
 }

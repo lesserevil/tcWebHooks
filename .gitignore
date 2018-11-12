@@ -6,3 +6,5 @@
 .DS_Store
 # Java annotation processor (APT)
 .factorypath
+.idea
+*.iml

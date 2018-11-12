@@ -1,30 +1,9 @@
 package webhook.teamcity.test.springmock;
 
-import java.util.Collection;
-import java.util.Date;
-import java.util.List;
-import java.util.Map;
-import java.util.concurrent.ScheduledExecutorService;
-
+import jetbrains.buildServer.ExtensionsCollection;
 import jetbrains.buildServer.ServiceNotFoundException;
 import jetbrains.buildServer.TeamCityExtension;
-import jetbrains.buildServer.serverSide.BuildAgentManager;
-import jetbrains.buildServer.serverSide.BuildDataFilter;
-import jetbrains.buildServer.serverSide.BuildHistory;
-import jetbrains.buildServer.serverSide.BuildQueryOptions;
-import jetbrains.buildServer.serverSide.BuildQueue;
-import jetbrains.buildServer.serverSide.BuildServerListener;
-import jetbrains.buildServer.serverSide.LicensingPolicy;
-import jetbrains.buildServer.serverSide.PersonalBuildManager;
-import jetbrains.buildServer.serverSide.ProjectManager;
-import jetbrains.buildServer.serverSide.RunTypeRegistry;
-import jetbrains.buildServer.serverSide.SBuild;
-import jetbrains.buildServer.serverSide.SBuildAgent;
-import jetbrains.buildServer.serverSide.SBuildServer;
-import jetbrains.buildServer.serverSide.SBuildType;
-import jetbrains.buildServer.serverSide.SQLRunner;
-import jetbrains.buildServer.serverSide.SRunningBuild;
-import jetbrains.buildServer.serverSide.SourceVersionProvider;
+import jetbrains.buildServer.serverSide.*;
 import jetbrains.buildServer.serverSide.auth.LoginConfiguration;
 import jetbrains.buildServer.status.StatusProvider;
 import jetbrains.buildServer.users.User;
@@ -32,6 +11,14 @@ import jetbrains.buildServer.users.UserModel;
 import jetbrains.buildServer.util.ItemProcessor;
 import jetbrains.buildServer.vcs.VcsManager;
 import jetbrains.buildServer.vcs.VcsModificationHistory;
+import jetbrains.buildServer.version.ServerVersionInfo;
+import org.jetbrains.annotations.NotNull;
+
+import java.util.Collection;
+import java.util.Date;
+import java.util.List;
+import java.util.Map;
+import java.util.concurrent.ScheduledExecutorService;
 
 public class MockSBuildServer implements SBuildServer {
 
@@ -118,6 +105,12 @@ public class MockSBuildServer implements SBuildServer {
 	public <T extends TeamCityExtension> T getExtension(
 			Class<T> extensionClass, String sourceId) {
 		// TODO Auto-generated method stub
+		return null;
+	}
+
+	@NotNull
+	@Override
+	public <T extends TeamCityExtension> ExtensionsCollection<T> getExtensionsCollection(@NotNull Class<T> aClass) {
 		return null;
 	}
 
@@ -211,6 +204,11 @@ public class MockSBuildServer implements SBuildServer {
 	}
 
 	@Override
+	public boolean isStarted() {
+		return false;
+	}
+
+	@Override
 	public boolean isShuttingDown() {
 		// TODO Auto-generated method stub
 		return false;
@@ -288,11 +286,11 @@ public class MockSBuildServer implements SBuildServer {
 		return null;
 	}
 
-	@Override
-	public SourceVersionProvider getSourceVersionProvider() {
+	//@Override
+	//public SourceVersionProvider getSourceVersionProvider() {
 		// TODO Auto-generated method stub
-		return null;
-	}
+		//return null;
+	//}
 
 	@Override
 	public LoginConfiguration getLoginConfiguration() {
@@ -310,6 +308,12 @@ public class MockSBuildServer implements SBuildServer {
 	public byte getServerMinorVersion() {
 		// TODO Auto-generated method stub
 		return 0;
+	}
+
+	@NotNull
+	@Override
+	public ServerVersionInfo getVersion() {
+		return null;
 	}
 
 	@Override

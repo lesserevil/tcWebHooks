@@ -16,57 +16,23 @@ import jetbrains.buildServer.messages.Status;
 import jetbrains.buildServer.parameters.ParametersProvider;
 import jetbrains.buildServer.parameters.ValueResolver;
 import jetbrains.buildServer.requirements.Requirement;
-import jetbrains.buildServer.serverSide.AgentCompatibility;
-import jetbrains.buildServer.serverSide.AgentDescription;
-import jetbrains.buildServer.serverSide.BuildNumbers;
-import jetbrains.buildServer.serverSide.BuildRunnerDescriptor;
-import jetbrains.buildServer.serverSide.BuildTypeRenamingFailedException;
-import jetbrains.buildServer.serverSide.BuildTypeTemplate;
-import jetbrains.buildServer.serverSide.CannotAttachToTemplateException;
-import jetbrains.buildServer.serverSide.CompatibilityResult;
-import jetbrains.buildServer.serverSide.ConfigAction;
-import jetbrains.buildServer.serverSide.CustomDataStorage;
-import jetbrains.buildServer.serverSide.DuplicateBuildTypeNameException;
-import jetbrains.buildServer.serverSide.InvalidIdentifierException;
-import jetbrains.buildServer.serverSide.InvalidVcsRootScopeException;
-import jetbrains.buildServer.serverSide.Parameter;
-import jetbrains.buildServer.serverSide.PersistFailedException;
-import jetbrains.buildServer.serverSide.ResolvedSettings;
-import jetbrains.buildServer.serverSide.ResponsibilityInfo;
-import jetbrains.buildServer.serverSide.RunType;
-import jetbrains.buildServer.serverSide.SBuild;
-import jetbrains.buildServer.serverSide.SBuildAgent;
-import jetbrains.buildServer.serverSide.SBuildFeatureDescriptor;
-import jetbrains.buildServer.serverSide.SBuildRunnerDescriptor;
-import jetbrains.buildServer.serverSide.SBuildType;
-import jetbrains.buildServer.serverSide.SFinishedBuild;
-import jetbrains.buildServer.serverSide.SPersistentEntity;
-import jetbrains.buildServer.serverSide.SProject;
-import jetbrains.buildServer.serverSide.SQueuedBuild;
-import jetbrains.buildServer.serverSide.SRunningBuild;
+import jetbrains.buildServer.serverSide.*;
 import jetbrains.buildServer.serverSide.artifacts.SArtifactDependency;
 import jetbrains.buildServer.serverSide.comments.Comment;
 import jetbrains.buildServer.serverSide.dependency.CyclicDependencyFoundException;
 import jetbrains.buildServer.serverSide.dependency.Dependency;
 import jetbrains.buildServer.serverSide.dependency.Dependent;
 import jetbrains.buildServer.serverSide.identifiers.DuplicateExternalIdException;
+import jetbrains.buildServer.serverSide.parameters.types.TypedValue;
 import jetbrains.buildServer.users.SUser;
 import jetbrains.buildServer.users.User;
 import jetbrains.buildServer.util.Option;
-import jetbrains.buildServer.vcs.CheckoutRules;
-import jetbrains.buildServer.vcs.FilteredVcsChange;
-import jetbrains.buildServer.vcs.PathMapping;
-import jetbrains.buildServer.vcs.SVcsModification;
-import jetbrains.buildServer.vcs.SVcsRoot;
-import jetbrains.buildServer.vcs.VcsException;
-import jetbrains.buildServer.vcs.VcsRoot;
-import jetbrains.buildServer.vcs.VcsRootEntry;
-import jetbrains.buildServer.vcs.VcsRootInstance;
-import jetbrains.buildServer.vcs.VcsRootInstanceEntry;
-import jetbrains.buildServer.vcs.VcsRootNotFoundException;
+import jetbrains.buildServer.vcs.*;
 
 import org.jdom.Element;
 
+import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 import webhook.testframework.WebHookMockingFramework;
 
 @SuppressWarnings("rawtypes")
@@ -131,6 +97,11 @@ public class MockSBuildType implements SBuildType {
 
 	public void forceCheckingForChanges() {
 		// TODO Auto-generated method stub
+
+	}
+
+	@Override
+	public void forceCheckingForChanges(@NotNull OperationRequestor operationRequestor) {
 
 	}
 
@@ -408,6 +379,11 @@ public class MockSBuildType implements SBuildType {
 
 	}
 
+	@Override
+	public void removeRequirement(Requirement requirement) {
+
+	}
+
 	public boolean removeVcsRoot(SVcsRoot arg0) {
 		return false;
 		// TODO Auto-generated method stub
@@ -416,6 +392,16 @@ public class MockSBuildType implements SBuildType {
 
 	public void setArtifactDependencies(List<SArtifactDependency> arg0) {
 		// TODO Auto-generated method stub
+
+	}
+
+	@Override
+	public void addArtifactDependency(@NotNull SArtifactDependency sArtifactDependency) {
+
+	}
+
+	@Override
+	public void removeArtifactDependency(@NotNull SArtifactDependency sArtifactDependency) {
 
 	}
 
@@ -606,6 +592,17 @@ public class MockSBuildType implements SBuildType {
 		return 0;
 	}
 
+	@Override
+	public boolean isReadOnly() {
+		return false;
+	}
+
+	@Nullable
+	@Override
+	public String getReadOnlyReason() {
+		return null;
+	}
+
 	public boolean intersectsWith(Dependent arg0) {
 		// TODO Auto-generated method stub
 		return false;
@@ -627,6 +624,12 @@ public class MockSBuildType implements SBuildType {
 
 	public Map<String, String> getParameters() {
 		// TODO Auto-generated method stub
+		return null;
+	}
+
+	@Nullable
+	@Override
+	public String getParameterValue(@NotNull String s) {
 		return null;
 	}
 
@@ -681,6 +684,11 @@ public class MockSBuildType implements SBuildType {
 	public void applyRunnersOrder(String[] arg0) {
 		// TODO Auto-generated method stub
 		
+	}
+
+	@Override
+	public void resetRunnersOrder() {
+
 	}
 
 	public SBuildRunnerDescriptor findBuildRunnerById(String arg0) {
@@ -748,9 +756,21 @@ public class MockSBuildType implements SBuildType {
 		return false;
 	}
 
+	@NotNull
+	@Override
+	public List<? extends BuildTypeTemplate> getTemplates() {
+		return null;
+	}
+
 	public void removeAllBuildRunners() {
 		// TODO Auto-generated method stub
 		
+	}
+
+	@Nullable
+	@Override
+	public String[] getRunnersOrder() {
+		return new String[0];
 	}
 
 	public SBuildFeatureDescriptor removeBuildFeature(String arg0) {
@@ -806,6 +826,12 @@ public class MockSBuildType implements SBuildType {
 		return null;
 	}
 
+	@Nullable
+	@Override
+	public Parameter getParameter(@NotNull String s) {
+		return null;
+	}
+
 	public void removeParameter(String arg0) {
 		// TODO Auto-generated method stub
 		
@@ -842,6 +868,16 @@ public class MockSBuildType implements SBuildType {
 		
 	}
 
+	@Override
+	public void setTemplatesOrder(List<String> list) {
+
+	}
+
+	@Override
+	public List<? extends BuildTypeTemplate> getOwnTemplates() {
+		return null;
+	}
+
 	public SBuildRunnerDescriptor findBuildRunnerByType(String arg0) {
 		// TODO Auto-generated method stub
 		return null;
@@ -860,6 +896,21 @@ public class MockSBuildType implements SBuildType {
 	public byte[] getFileContent(String arg0) throws VcsException {
 		// TODO Auto-generated method stub
 		return null;
+	}
+
+	@Override
+	public void setTemplates(@NotNull List<? extends BuildTypeTemplate> list, boolean b) {
+
+	}
+
+	@Override
+	public void addTemplate(@NotNull BuildTypeTemplate buildTypeTemplate, boolean b) {
+
+	}
+
+	@Override
+	public void removeTemplates(@NotNull Collection<? extends BuildTypeTemplate> collection, boolean b) {
+
 	}
 
 	public List<Dependency> getOwnDependencies() {
@@ -889,6 +940,12 @@ public class MockSBuildType implements SBuildType {
 
 	public VcsRootInstance getVcsRootInstanceForParent(SVcsRoot arg0) {
 		// TODO Auto-generated method stub
+		return null;
+	}
+
+	@Nullable
+	@Override
+	public VcsRootInstanceEntry getVcsRootInstanceEntryForParent(@NotNull SVcsRoot sVcsRoot) {
 		return null;
 	}
 
@@ -964,6 +1021,17 @@ public class MockSBuildType implements SBuildType {
 		return true;
 	}
 
+	@NotNull
+	@Override
+	public <T> TypedValue<T> getTypedOption(@NotNull Option<T> option) {
+		return null;
+	}
+
+	@Override
+	public boolean isCompositeBuildType() {
+		return false;
+	}
+
 	@Override
 	public void setEnabled(String arg0, boolean arg1) {
 		// TODO Auto-generated method stub
@@ -1014,6 +1082,17 @@ public class MockSBuildType implements SBuildType {
 		return null;
 	}
 
+	@NotNull
+	@Override
+	public PersistentEntityVersion getVersion() {
+		return null;
+	}
+
+	@Override
+	public void markPersisted(long l) {
+
+	}
+
 	@Override
 	public BuildTypeStatusDescriptor getStatusDescriptor() {
 		// TODO Auto-generated method stub
@@ -1034,6 +1113,12 @@ public class MockSBuildType implements SBuildType {
 	@Override
 	public Map<String, String> getOwnParameters() {
 		// TODO Auto-generated method stub
+		return null;
+	}
+
+	@Nullable
+	@Override
+	public Parameter getOwnParameter(@NotNull String s) {
 		return null;
 	}
 
@@ -1120,6 +1205,12 @@ public class MockSBuildType implements SBuildType {
 		return false;
 	}
 
+	@NotNull
+	@Override
+	public List<String> getTemplateIds() {
+		return null;
+	}
+
 	@Override
 	public boolean replaceInValues(Pattern arg0, String arg1) {
 		// TODO Auto-generated method stub
@@ -1135,6 +1226,12 @@ public class MockSBuildType implements SBuildType {
 	@Override
 	public <T> T getOptionDefaultValue(Option<T> arg0) {
 		// TODO Auto-generated method stub
+		return null;
+	}
+
+	@Nullable
+	@Override
+	public <T> T getDeclaredOption(Option<T> option) {
 		return null;
 	}
 

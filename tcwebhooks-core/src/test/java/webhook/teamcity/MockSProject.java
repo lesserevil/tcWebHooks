@@ -12,24 +12,7 @@ import jetbrains.buildServer.BuildTypeDescriptor.CheckoutType;
 import jetbrains.buildServer.messages.Status;
 import jetbrains.buildServer.parameters.ParametersProvider;
 import jetbrains.buildServer.parameters.ValueResolver;
-import jetbrains.buildServer.serverSide.BuildTypeIdentity;
-import jetbrains.buildServer.serverSide.BuildTypeTemplate;
-import jetbrains.buildServer.serverSide.ConfigAction;
-import jetbrains.buildServer.serverSide.CopyOptions;
-import jetbrains.buildServer.serverSide.CyclicDependencyException;
-import jetbrains.buildServer.serverSide.DuplicateBuildTypeNameException;
-import jetbrains.buildServer.serverSide.DuplicateProjectNameException;
-import jetbrains.buildServer.serverSide.DuplicateTemplateNameException;
-import jetbrains.buildServer.serverSide.InvalidIdentifierException;
-import jetbrains.buildServer.serverSide.InvalidNameException;
-import jetbrains.buildServer.serverSide.InvalidVcsRootScopeException;
-import jetbrains.buildServer.serverSide.MaxNumberOfBuildTypesReachedException;
-import jetbrains.buildServer.serverSide.Parameter;
-import jetbrains.buildServer.serverSide.PersistFailedException;
-import jetbrains.buildServer.serverSide.SBuildType;
-import jetbrains.buildServer.serverSide.SPersistentEntity;
-import jetbrains.buildServer.serverSide.SProject;
-import jetbrains.buildServer.serverSide.TemplateCannotBeRemovedException;
+import jetbrains.buildServer.serverSide.*;
 import jetbrains.buildServer.serverSide.identifiers.DuplicateExternalIdException;
 import jetbrains.buildServer.users.User;
 import jetbrains.buildServer.vcs.DuplicateVcsRootNameException;
@@ -40,6 +23,8 @@ import jetbrains.buildServer.vcs.VcsRootInstance;
 import org.jdom.Element;
 
 import com.intellij.util.containers.HashMap;
+import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
 @SuppressWarnings("deprecation")
 public class MockSProject implements SProject {
@@ -158,6 +143,30 @@ public class MockSProject implements SProject {
 		this.description = arg0;
 	}
 
+	@Nullable
+	@Override
+	public String getDefaultTemplateId() {
+		return null;
+	}
+
+	@Nullable
+	@Override
+	public String getOwnDefaultTemplateId() {
+		return null;
+	}
+
+	@Nullable
+	@Override
+	public BuildTypeTemplate getDefaultTemplate() {
+		return null;
+	}
+
+	@Nullable
+	@Override
+	public BuildTypeTemplate getOwnDefaultTemplate() {
+		return null;
+	}
+
 	public void setName(String arg0) {
 		this.name = arg0;
 	}
@@ -204,8 +213,20 @@ public class MockSProject implements SProject {
 		return null;
 	}
 
+	@Nullable
+	@Override
+	public String getParameterValue(@NotNull String s) {
+		return null;
+	}
+
 	public Collection<Parameter> getParametersCollection() {
 		// TODO Auto-generated method stub
+		return null;
+	}
+
+	@Nullable
+	@Override
+	public Parameter getParameter(@NotNull String s) {
 		return null;
 	}
 
@@ -354,9 +375,26 @@ public class MockSProject implements SProject {
 		return null;
 	}
 
+	@NotNull
+	@Override
+	public PersistentEntityVersion getVersion() {
+		return null;
+	}
+
+	@Override
+	public void markPersisted(long l) {
+
+	}
+
 	@Override
 	public Map<String, String> getOwnParameters() {
 		// TODO Auto-generated method stub
+		return null;
+	}
+
+	@Nullable
+	@Override
+	public Parameter getOwnParameter(@NotNull String s) {
 		return null;
 	}
 
@@ -432,6 +470,81 @@ public class MockSProject implements SProject {
 		return null;
 	}
 
+	@NotNull
+	@Override
+	public SProjectFeatureDescriptor addFeature(@NotNull String s, @NotNull Map<String, String> map) {
+		return null;
+	}
+
+	@Override
+	public void addFeature(@NotNull SProjectFeatureDescriptor sProjectFeatureDescriptor) {
+
+	}
+
+	@NotNull
+	@Override
+	public Collection<SProjectFeatureDescriptor> getOwnFeatures() {
+		return null;
+	}
+
+	@NotNull
+	@Override
+	public Collection<SProjectFeatureDescriptor> getOwnFeaturesOfType(@NotNull String s) {
+		return null;
+	}
+
+	@NotNull
+	@Override
+	public Collection<SProjectFeatureDescriptor> getAvailableFeaturesOfType(@NotNull String s) {
+		return null;
+	}
+
+	@NotNull
+	@Override
+	public Collection<SProjectFeatureDescriptor> getAvailableFeatures() {
+		return null;
+	}
+
+	@Nullable
+	@Override
+	public SProjectFeatureDescriptor removeFeature(@NotNull String s) {
+		return null;
+	}
+
+	@Override
+	public boolean updateFeature(@NotNull String s, @NotNull String s1, @NotNull Map<String, String> map) {
+		return false;
+	}
+
+	@Nullable
+	@Override
+	public SProjectFeatureDescriptor findFeatureById(@NotNull String s) {
+		return null;
+	}
+
+	@Override
+	public boolean isReadOnly() {
+		return false;
+	}
+
+	@Nullable
+	@Override
+	public String getReadOnlyReason() {
+		return null;
+	}
+
+	@NotNull
+	@Override
+	public CustomDataStorage getCustomDataStorage(@NotNull String s) {
+		return null;
+	}
+
+	@NotNull
+	@Override
+	public Status getStatus(@NotNull String s) {
+		return null;
+	}
+
 	@Override
 	public SVcsRoot createVcsRoot(String arg0, String arg1,
 			Map<String, String> arg2) throws UnknownVcsException,
@@ -444,6 +557,12 @@ public class MockSProject implements SProject {
 	public SVcsRoot createVcsRoot(String arg0, String arg1, String arg2)
 			throws DuplicateExternalIdException, DuplicateVcsRootNameException {
 		// TODO Auto-generated method stub
+		return null;
+	}
+
+	@NotNull
+	@Override
+	public SVcsRoot createDummyVcsRoot(@NotNull String s, @NotNull Map<String, String> map) {
 		return null;
 	}
 

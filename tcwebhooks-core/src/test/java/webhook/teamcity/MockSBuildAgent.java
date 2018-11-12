@@ -11,9 +11,11 @@ import jetbrains.buildServer.serverSide.SBuildAgent;
 import jetbrains.buildServer.serverSide.SBuildType;
 import jetbrains.buildServer.serverSide.SFinishedBuild;
 import jetbrains.buildServer.serverSide.SRunningBuild;
+import jetbrains.buildServer.serverSide.agentPools.AgentPool;
 import jetbrains.buildServer.serverSide.comments.Comment;
 import jetbrains.buildServer.users.SUser;
 import jetbrains.buildServer.users.User;
+import org.jetbrains.annotations.NotNull;
 
 public class MockSBuildAgent implements SBuildAgent, BuildAgent {
 
@@ -177,6 +179,11 @@ public class MockSBuildAgent implements SBuildAgent, BuildAgent {
 		return 0;
 	}
 
+	@Override
+	public int getAgentPoolId() {
+		return 0;
+	}
+
 	public int getId() {
 		return this.agentId;
 	}
@@ -256,11 +263,28 @@ public class MockSBuildAgent implements SBuildAgent, BuildAgent {
 		return null;
 	}
 
+	@NotNull
+	@Override
+	public AgentPool getAgentPool() {
+		return null;
+	}
+
+	@Override
+	public boolean isCloudAgent() {
+		return false;
+	}
+
 	@Override
 	public String getCommunicationProtocolDescription() {
 		// TODO Auto-generated method stub
 		return null;
 	}
-	
+
+	@NotNull
+	@Override
+	public String getCommunicationProtocolType() {
+		return null;
+	}
+
 
 }

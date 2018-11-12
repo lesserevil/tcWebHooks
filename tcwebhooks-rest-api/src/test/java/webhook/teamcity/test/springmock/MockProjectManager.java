@@ -5,6 +5,7 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
 import java.util.Collection;
+import java.util.Comparator;
 import java.util.List;
 import java.util.SortedMap;
 
@@ -24,6 +25,7 @@ import jetbrains.buildServer.serverSide.auth.AccessDeniedException;
 import jetbrains.buildServer.serverSide.identifiers.DuplicateExternalIdException;
 import jetbrains.buildServer.users.User;
 import jetbrains.buildServer.vcs.SVcsRoot;
+import org.jetbrains.annotations.NotNull;
 
 public class MockProjectManager implements ProjectManager {
 	
@@ -260,11 +262,11 @@ public class MockProjectManager implements ProjectManager {
 		return false;
 	}
 
-	@Override
-	public List<SBuildType> getBuildTypesDependingOn(SBuildType type) {
+	//@Override
+	//public List<SBuildType> getBuildTypesDependingOn(SBuildType type) {
 		// TODO Auto-generated method stub
-		return null;
-	}
+		//return null;
+	//}
 
 	@Override
 	public BuildTypeTemplate findBuildTypeTemplateById(String id) {
@@ -287,6 +289,18 @@ public class MockProjectManager implements ProjectManager {
 	@Override
 	public SProject getCommonParentProject(Collection<SProject> projects) {
 		// TODO Auto-generated method stub
+		return null;
+	}
+
+	@NotNull
+	@Override
+	public Comparator<SProject> getProjectsComparator() {
+		return null;
+	}
+
+	@NotNull
+	@Override
+	public Comparator<SBuildType> getBuildTypesComparator() {
 		return null;
 	}
 
