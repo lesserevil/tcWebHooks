@@ -53,6 +53,7 @@ public class WebHookPayloadContent {
 		agentName,
 		agentOs,
 		agentHostname,
+		agentPoolname,
 		triggeredBy,
 		comment,
 		message,
@@ -205,6 +206,7 @@ public class WebHookPayloadContent {
     		setAgentName(sRunningBuild.getAgentName());
     		setAgentOs(sRunningBuild.getAgent().getOperatingSystemName());
     		setAgentHostname(sRunningBuild.getAgent().getHostName());
+    		setAgentPoolname(sRunningBuild.getAgent().getAgentPool().getName());
     		setTriggeredBy(sRunningBuild.getTriggeredBy().getAsString());
     		setComment(WebHooksComment.build(sRunningBuild.getBuildComment()));
     		setTags(sRunningBuild.getTags());
@@ -507,6 +509,14 @@ public class WebHookPayloadContent {
 			this.agentHostname = agentHostname;
 		}
 
+		public String getAgentPoolname() {
+		return agentPoolname;
+	}
+
+		public void setAgentPoolname(String agentPoolname) {
+		this.agentPoolname = agentPoolname;
+	}
+
 		public String getTriggeredBy() {
 			return triggeredBy;
 		}
@@ -620,6 +630,10 @@ public class WebHookPayloadContent {
 		public String getResponsibilityUserNew() {
 			return responsibilityUserNew;
 		}
+
+		public boolean getBuildIsPersonal() { return buildIsPersonal;}
+
+		public void setBuildIsPersonal(boolean buildIsPersonal) { this.buildIsPersonal = buildIsPersonal; }
 		
 		public Map<String, ExtraParametersMap> getAllParameters(){
 			Map<String, ExtraParametersMap> allParameters = new LinkedHashMap<String, ExtraParametersMap>();

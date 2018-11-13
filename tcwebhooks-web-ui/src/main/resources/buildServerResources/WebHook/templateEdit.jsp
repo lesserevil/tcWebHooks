@@ -257,7 +257,7 @@
 					"buildStartTime", "currentTime",  
 					"branchName", "branchDisplayName", "branchIsDefault", "branch",
 					"text", "message",  "rootUrl", "buildStatusHtml", 
-					"agentName", "agentHostname", "agentOs",  
+					"agentName", "agentHostname", "agentOs", "agentPoolname",
 					"responsibilityUserOld", "responsibilityUserNew"  
 					];
     

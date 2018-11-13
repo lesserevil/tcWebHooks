@@ -1,5 +1,6 @@
 package webhook.teamcity;
 
+import java.util.Collection;
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
@@ -266,7 +267,64 @@ public class MockSBuildAgent implements SBuildAgent, BuildAgent {
 	@NotNull
 	@Override
 	public AgentPool getAgentPool() {
-		return null;
+		AgentPool ap = new AgentPool() {
+
+			@Override
+			public int getMaxAgents() {
+				return 0;
+			}
+
+			@Override
+			public int getMinAgents() {
+				return 0;
+			}
+
+			@Override
+			public int getAgentPoolId() {
+				return 0;
+			}
+
+			@Override
+			public boolean isDefault() {
+				return false;
+			}
+
+			@NotNull
+			@Override
+			public String getName() {
+				return "Poolname";
+
+			}
+
+			@NotNull
+			@Override
+			public Collection<String> getProjectIds() {
+				return null;
+			}
+
+			@NotNull
+			@Override
+			public Collection<String> getProjectIds(boolean b) {
+				return null;
+			}
+
+			@Override
+			public boolean containsProjectId(@NotNull String s) {
+				return false;
+			}
+
+			@NotNull
+			@Override
+			public Collection<Integer> getAgentTypeIds() {
+				return null;
+			}
+
+			@Override
+			public boolean isProjectPool() {
+				return false;
+			}
+		};
+		return ap;
 	}
 
 	@Override
