@@ -239,6 +239,7 @@ public class WebHookPayloadContent {
 				tests.add(test);
 			}
 			testResults = gson.toJson(tests);
+			Loggers.SERVER.debug("testResults: " + testResults);
 		}
 
 		String getTestResults() { return testResults; }
