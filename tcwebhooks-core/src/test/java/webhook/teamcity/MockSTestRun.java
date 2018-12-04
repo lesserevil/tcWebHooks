@@ -39,13 +39,13 @@ public class MockSTestRun implements STestRun {
             @NotNull
             @Override
             public String getProjectId() {
-                return null;
+                return "ProjectId";
             }
 
             @Nullable
             @Override
             public String getProjectExternalId() {
-                return null;
+                return "ProjectExternalId";
             }
 
             @Nullable
@@ -118,7 +118,7 @@ public class MockSTestRun implements STestRun {
     @NotNull
     @Override
     public String getStatusText() {
-        return null;
+        return "StatusText";
     }
 
     @Nullable
