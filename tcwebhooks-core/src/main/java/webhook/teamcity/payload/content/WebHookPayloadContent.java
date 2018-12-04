@@ -227,7 +227,7 @@ public class WebHookPayloadContent {
 			setTestResults(sRunningBuild);
 		}
 
-		void setTestResults(SBuild build) {
+		private void setTestResults(SBuild build) {
 			List<Map> tests = new ArrayList<>();
 			for (STestRun t : build.getFullStatistics().getAllTests()) {
 				Map<String, Object> test = new HashMap<>();
@@ -242,7 +242,7 @@ public class WebHookPayloadContent {
 			Loggers.SERVER.debug("testResults: " + testResults);
 		}
 
-		String getTestResults() { return testResults; }
+		public String getTestResults() { return testResults; }
 		
 		public List<String> getBuildTags() {
 			return buildTags;
