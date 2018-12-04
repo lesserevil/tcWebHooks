@@ -232,7 +232,7 @@ public class WebHookPayloadContent {
 			for (STestRun t : build.getFullStatistics().getAllTests()) {
 				Map<String, Object> test = new HashMap<>();
 				test.put("testDuration", t.getDuration());
-				test.put("id", "id:" + t.getTest().getTestNameId() + ",build:(id:" + String.valueOf(t.getBuildId()) + ")");
+				test.put("id", "id:" + t.getTestRunId() + ",build:(id:" + String.valueOf(t.getBuildId()) + ")");
 				test.put("name", t.getTest().getName().getAsString());
 				test.put("status", t.getStatusText());
 
