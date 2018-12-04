@@ -23,7 +23,7 @@ public class MockSTestRun implements STestRun {
             @NotNull
             @Override
             public TestName getName() {
-                return null;
+                return new TestName("testname");
             }
 
             @Override
