@@ -258,6 +258,7 @@
 					"branchName", "branchDisplayName", "branchIsDefault", "branch",
 					"text", "message",  "rootUrl", "buildStatusHtml", 
 					"agentName", "agentHostname", "agentOs", "agentPoolname",
+					"testResults",
 					"responsibilityUserOld", "responsibilityUserNew"  
 					];
     

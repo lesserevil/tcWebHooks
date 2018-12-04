@@ -1,22 +1,14 @@
 package webhook.teamcity.payload.content;
 
 import java.text.SimpleDateFormat;
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.Map.Entry;
-import java.util.SortedMap;
 
+import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
 import com.intellij.util.containers.hash.LinkedHashMap;
 
-import jetbrains.buildServer.serverSide.Branch;
-import jetbrains.buildServer.serverSide.SBuild;
-import jetbrains.buildServer.serverSide.SBuildRunnerDescriptor;
-import jetbrains.buildServer.serverSide.SBuildServer;
-import jetbrains.buildServer.serverSide.SBuildType;
-import jetbrains.buildServer.serverSide.SFinishedBuild;
-import jetbrains.buildServer.serverSide.SRunningBuild;
+import jetbrains.buildServer.serverSide.*;
 import jetbrains.buildServer.vcs.SVcsModification;
 import lombok.Getter;
 import lombok.Setter;
@@ -62,7 +54,8 @@ public class WebHookPayloadContent {
 		branchDisplayName,
 		buildStateDescription,
 		responsibilityUserOld,
-		responsibilityUserNew;
+		responsibilityUserNew,
+		testResults;
 		Boolean branchIsDefault;
 		
 		@Getter @Setter
@@ -75,6 +68,8 @@ public class WebHookPayloadContent {
 		ExtraParametersMap extraParameters;
 		private ExtraParametersMap teamcityProperties;
 		private List<WebHooksChanges> changes = new ArrayList<>();
+
+		static Gson gson = new Gson();
 		
 		/**
 		 * Constructor: Only called by RepsonsibilityChanged.
@@ -229,7 +224,24 @@ public class WebHookPayloadContent {
     		setRootUrl(server.getRootUrl());
 			setBuildStatusHtml(buildState, templates.get(WebHookPayloadDefaultTemplates.HTML_BUILDSTATUS_TEMPLATE));
 			setBuildIsPersonal(sRunningBuild.isPersonal());
+			setTestResults(sRunningBuild);
 		}
+
+		void setTestResults(SBuild build) {
+			List<Map> tests = new ArrayList<>();
+			for (STestRun t : build.getBuildStatistics(BuildStatisticsOptions.ALL_TESTS_NO_DETAILS).getAllTests()) {
+				Map<String, Object> test = new HashMap<>();
+				test.put("testDuration", t.getDuration());
+				test.put("id", "id:" + t.getTest().getTestNameId() + ",build:{id:" + String.valueOf(t.getBuildId()) + ")");
+				test.put("name", t.getTest().getName());
+				test.put("status", t.getStatusText());
+				test.put("href", "/httpAuth/app/rest/testOccurrences/" + test.get("id"));
+				tests.add(test);
+			}
+			testResults = gson.toJson(tests);
+		}
+
+		String getTestResults() { return testResults; }
 		
 		public List<String> getBuildTags() {
 			return buildTags;

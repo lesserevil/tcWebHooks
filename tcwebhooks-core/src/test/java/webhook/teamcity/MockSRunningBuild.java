@@ -605,7 +605,7 @@ public class MockSRunningBuild implements SRunningBuild {
 
 	public BuildStatistics getBuildStatistics(BuildStatisticsOptions arg0) {
 		// TODO Auto-generated method stub
-		return null;
+		return new MockSBuildStatistics();
 	}
 
 	public SBuildType getBuildType() {
