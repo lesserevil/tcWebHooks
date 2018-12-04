@@ -229,7 +229,7 @@ public class WebHookPayloadContent {
 
 		void setTestResults(SBuild build) {
 			List<Map> tests = new ArrayList<>();
-			for (STestRun t : build.getBuildStatistics(BuildStatisticsOptions.ALL_TESTS_NO_DETAILS).getAllTests()) {
+			for (STestRun t : build.getFullStatistics().getAllTests()) {
 				Map<String, Object> test = new HashMap<>();
 				test.put("testDuration", t.getDuration());
 				test.put("id", "id:" + t.getTest().getTestNameId() + ",build:{id:" + String.valueOf(t.getBuildId()) + ")");
