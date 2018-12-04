@@ -18,22 +18,7 @@ import jetbrains.buildServer.messages.BuildMessage1;
 import jetbrains.buildServer.messages.Status;
 import jetbrains.buildServer.parameters.ParametersProvider;
 import jetbrains.buildServer.parameters.ValueResolver;
-import jetbrains.buildServer.serverSide.Branch;
-import jetbrains.buildServer.serverSide.BuildPromotion;
-import jetbrains.buildServer.serverSide.BuildRevision;
-import jetbrains.buildServer.serverSide.BuildStatistics;
-import jetbrains.buildServer.serverSide.BuildStatisticsOptions;
-import jetbrains.buildServer.serverSide.DownloadedArtifacts;
-import jetbrains.buildServer.serverSide.RepositoryVersion;
-import jetbrains.buildServer.serverSide.SBuild;
-import jetbrains.buildServer.serverSide.SBuildAgent;
-import jetbrains.buildServer.serverSide.SBuildFeatureDescriptor;
-import jetbrains.buildServer.serverSide.SBuildType;
-import jetbrains.buildServer.serverSide.SFinishedBuild;
-import jetbrains.buildServer.serverSide.SProject;
-import jetbrains.buildServer.serverSide.SRunningBuild;
-import jetbrains.buildServer.serverSide.ShortStatistics;
-import jetbrains.buildServer.serverSide.TriggeredBy;
+import jetbrains.buildServer.serverSide.*;
 import jetbrains.buildServer.serverSide.artifacts.BuildArtifacts;
 import jetbrains.buildServer.serverSide.artifacts.BuildArtifactsViewMode;
 import jetbrains.buildServer.serverSide.artifacts.SArtifactDependency;
@@ -604,7 +589,6 @@ public class MockSRunningBuild implements SRunningBuild {
 	}
 
 	public BuildStatistics getBuildStatistics(BuildStatisticsOptions arg0) {
-		// TODO Auto-generated method stub
 		return new MockSBuildStatistics();
 	}
 
@@ -643,8 +627,7 @@ public class MockSRunningBuild implements SRunningBuild {
 	}
 
 	public BuildStatistics getFullStatistics() {
-		// TODO Auto-generated method stub
-		return null;
+		return new MockSBuildStatistics();
 	}
 
 	public List<VcsLabel> getLabels() {
