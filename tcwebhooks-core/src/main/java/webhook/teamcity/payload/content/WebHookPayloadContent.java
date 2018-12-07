@@ -233,7 +233,7 @@ public class WebHookPayloadContent {
 				Map<String, Object> test = new HashMap<>();
 				test.put("testDuration", t.getDuration());
 				test.put("id", t.getTestRunId());
-				test.put("build", String.valueOf(t.getBuildId()));
+				test.put("build", t.getBuildId());
 				test.put("name", t.getTest().getName().getNameWithoutSuite());
 				test.put("full_name", t.getTest().getName().getAsString());
 				test.put("status", t.getStatusText());
