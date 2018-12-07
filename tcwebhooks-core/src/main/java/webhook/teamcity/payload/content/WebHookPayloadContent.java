@@ -232,11 +232,12 @@ public class WebHookPayloadContent {
 			for (STestRun t : build.getFullStatistics().getAllTests()) {
 				Map<String, Object> test = new HashMap<>();
 				test.put("testDuration", t.getDuration());
-				test.put("id", "id:" + t.getTestRunId() + ",build:(id:" + String.valueOf(t.getBuildId()) + ")");
-				test.put("name", t.getTest().getName().getAsString());
+				test.put("id", t.getTestRunId());
+				test.put("build", String.valueOf(t.getBuildId()));
+				test.put("name", t.getTest().getName().getNameWithoutSuite());
+				test.put("full_name", t.getTest().getName().getAsString());
 				test.put("status", t.getStatusText());
-
-				test.put("href", "/httpAuth/app/rest/testOccurrences/" + test.get("id"));
+				test.put("href", "/httpAuth/app/rest/testOccurrences/" + "id:" + t.getTestRunId() + ",build:(id:" + String.valueOf(t.getBuildId()) + ")");
 				tests.add(test);
 			}
 			testResults = gson.toJson(tests);
