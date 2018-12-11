@@ -38,6 +38,7 @@ public class WebHookPayloadContent {
 		buildFinishTime,
 		rootUrl,
 		projectName,
+		topProjectName,
 		projectId,
 		projectInternalId,
 		projectExternalId,
@@ -194,6 +195,14 @@ public class WebHookPayloadContent {
     		setBuildInternalTypeId(TeamCityIdResolver.getInternalBuildId(sRunningBuild.getBuildType()));
     		setBuildExternalTypeId(TeamCityIdResolver.getExternalBuildId(sRunningBuild.getBuildType()));
     		setProjectName(sRunningBuild.getBuildType().getProjectName());
+    		List<SProject> projectPath = sRunningBuild.getBuildType().getProject().getProjectPath();
+    		if (projectPath.size() == 0) {
+				setTopProjectName("");
+			} else if (projectPath.size() == 1) {
+    			setTopProjectName("Root");
+			} else {
+				setTopProjectName(projectPath.get(1).getName());
+			}
     		setProjectId(TeamCityIdResolver.getProjectId(sRunningBuild.getBuildType().getProject()));
     		setProjectInternalId(TeamCityIdResolver.getInternalProjectId(sRunningBuild.getBuildType().getProject()));
     		setProjectExternalId(TeamCityIdResolver.getExternalProjectId(sRunningBuild.getBuildType().getProject()));
@@ -474,6 +483,14 @@ public class WebHookPayloadContent {
 
 		public void setProjectName(String projectName) {
 			this.projectName = projectName;
+		}
+
+		public String getTopProjectName() {
+			return topProjectName;
+		}
+
+		public void setTopProjectName(String topProjectName) {
+			this.topProjectName = topProjectName;
 		}
 
 		public String getProjectId() {
