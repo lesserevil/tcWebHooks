@@ -68,6 +68,11 @@
 	    <id>jetbrains-all</id>
 	    <url>http://repository.jetbrains.com/all</url>
 	  </repository>
+    <repository>
+          <id>JetBrains</id>
+                <url>https://download.jetbrains.com/teamcity-repository</url>
+                    </repository>
+
 	</repositories>
 	<dependencies>
 

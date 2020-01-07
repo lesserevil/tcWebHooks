@@ -10,10 +10,18 @@ public class WebHookHttpClientFactoryImpl implements WebHookHttpClientFactory {
 	
 	@Override
 	public HttpClient getHttpClient(){
-		return HttpClients..custom()
+    HttpClient client = null;
+    try {
+		  client = HttpClients.custom()
             .setSSLContext(new SSLContextBuilder().loadTrustMaterial(null, TrustAllStrategy.INSTANCE).build())
             .setSSLHostnameVerifier(NoopHostnameVerifier.INSTANCE)
             .build();
+            }
+     catch (Exception e) {
+       // Do Nothing; can actually never happen
+     }
+
+     return client;
 	}
 
 }
