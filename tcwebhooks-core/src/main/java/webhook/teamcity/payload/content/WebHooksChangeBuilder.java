@@ -12,7 +12,9 @@ public class WebHooksChangeBuilder{
 		List<WebHooksChanges> changes = new ArrayList<>();
 		
 		for (SVcsModification modification: mods){
-			changes.add(new WebHooksChanges(modification.getDisplayVersion(), WebHooksChange.build(modification, includeVcsFileModifications)));
+			if (!modification.isPersonal()) {
+				changes.add(new WebHooksChanges(modification.getDisplayVersion(), WebHooksChange.build(modification, includeVcsFileModifications)));
+			}
 		}
 		return changes;
 	}
