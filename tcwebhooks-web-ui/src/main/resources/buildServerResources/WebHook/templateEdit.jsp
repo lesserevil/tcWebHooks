@@ -22,12 +22,12 @@
     <bs:linkCSS>
       /css/admin/adminMain.css
       ${teamcityPluginResourcesPath}WebHook/css/styles.css
-      ${teamcityPluginResourcesPath}WebHook/highlight/styles/tomorrow.css
+      ${teamcityPluginResourcesPath}WebHook/3rd-party/highlight/styles/tomorrow.css
     </bs:linkCSS>
     <bs:linkScript>
-      ${teamcityPluginResourcesPath}WebHook/js/moment-2.22.2.min.js
+      ${teamcityPluginResourcesPath}WebHook/3rd-party/moment-2.22.2.min.js
       ${teamcityPluginResourcesPath}WebHook/js/editWebhookTemplate.js
-      ${teamcityPluginResourcesPath}WebHook/highlight/highlight.pack.js
+      ${teamcityPluginResourcesPath}WebHook/3rd-party/highlight/highlight.pack.js
     </bs:linkScript>
     <script type="text/javascript">
       BS.Navigation.items = [
@@ -50,10 +50,13 @@
 			      <a href="#" title="Make a copy of this Template" onclick="return WebHooksPlugin.copyTemplate('${webhookTemplateBean.templateId}'); return false">Copy template...</a>
 		        </l:li>
 		        <l:li>
+			      <a href="#" title="Export Template" onclick="WebHooksPlugin.exportTemplate('${webhookTemplateBean.templateId}'); return false">Export template...</a>
+		        </l:li>
+		        <l:li>
 			      <a href="#" title="Disable Template" onclick="WebHooksPlugin.disableTemplate('${webhookTemplateBean.templateId}'); return false">Disable template...</a>
 		        </l:li>
 		        <l:li>
-			      <a href="#" title="Delete Template" onclick="WebHooksPlugin.deleteTemplate({ templateId: '${webhookTemplateBean.templateId}' }); return false">Delete template...</a>
+			      <a href="#" title="Delete Template" onclick="WebHooksPlugin.deleteTemplate({ templateId: '${webhookTemplateBean.templateId}', templateState: '${webhookTemplateBean.templateState}', webHookCount: ${webHookCount} }); return false">Delete template...</a>
 		        </l:li>
 		      </jsp:body>
 		    </authz:authorize>
@@ -79,10 +82,10 @@
   		We load the ACE editor here because it loads extra resources, and if they were bundled in with the
   		TeamCity scripts in the linkscript tag, the base URL changes and ACE can't load its dependencies.  
   	 -->
-    <script type=text/javascript src="..${jspHome}WebHook/js/ace-editor/src-min-noconflict/ace.js"></script>
-    <script type=text/javascript src="..${jspHome}WebHook/js/ace-editor/src-min-noconflict/ext-language_tools.js"></script>
-    <script type=text/javascript src="..${jspHome}WebHook/js/jquery.easytabs.min.js"></script>
-	<script type=text/javascript src="..${jspHome}WebHook/js/jquery.color.js"></script>
+    <script type=text/javascript src="..${jspHome}WebHook/3rd-party/ace-editor/src-min-noconflict/ace.js"></script>
+    <script type=text/javascript src="..${jspHome}WebHook/3rd-party/ace-editor/src-min-noconflict/ext-language_tools.js"></script>
+    <script type=text/javascript src="..${jspHome}WebHook/3rd-party/jquery.easytabs.min.js"></script>
+	<script type=text/javascript src="..${jspHome}WebHook/3rd-party/jquery.color.js"></script>
 	    <script type=text/javascript>
 		var webhookDialogWidth = -1;
 		var webhookDialogHeight = -1;
@@ -116,25 +119,39 @@
           <th style="width:10%;" title="Determines Template ordering in the WebHook UI (smallest number first)">Rank:</th><td style="width:10%; border:none;">${webhookTemplateBean.rank}</td>
           <c:choose>
 		  	<c:when test="${not empty webhookTemplateBean.dateFormat}">
-          	<th style="width:15%;" title="Used used as the default date format when now,currentTime,buildStartTime,buildFinishTime, is used in a template. Use a SimpleDateFormat compatible string.">Date Format:</th><td style="border:none;">${webhookTemplateBean.dateFormat}</td>
+          	<th style="width:15%;" title="Used as the default date format when now,currentTime,buildStartTime,buildFinishTime, is used in a template. Use a SimpleDateFormat compatible string.">Date Format:</th><td style="border:none; white-space: pre;"><c:out value="${webhookTemplateBean.dateFormat}"/></td>
           	</c:when>
           	<c:otherwise>
-          	<th style="width:15%;">Date Format:</th><td style="border:none;"><i>none</i></td>
+          	<th style="width:15%;">Date Format:</th><td style="border:none; white-space: pre;"><i>none</i></td>
           	</c:otherwise>
           </c:choose>
         </tr>
         <tr>
-          <th style="width:15%;" title="Shown in the WebHook UI when choosing a Payload">Template Description:</th><td style="width:35%;">${webhookTemplateBean.templateDescription}</td>
-          <th style="width:15%;">Payload Format:</th><td style="width:35%;" colspan=3>${webhookTemplateBean.payloadFormat}</td>
+          <th style="width:15%;" title="Shown in the WebHook UI when choosing a Payload">Template Description:</th><td style="width:35%;"><c:out value="${webhookTemplateBean.templateDescription}"/></td>
+          <th style="width:15%;">Payload Format:</th><td style="width:15%;" colspan=1>${webhookTemplateBean.payloadFormat}</td>
+          <th style="width:15%;" title="The number of webhooks using this template">Associated Webhooks:</th>
+          <td style="width:15%;" colspan=1><a href="search.html?templateId=${webhookTemplateBean.templateId}">${webHookCount}&nbsp;webhook(s)</a></td>
         </tr>
         <tr>
           <th style="width:15%;" title="Used in the UI to show extra information about a Template">Tooltip Text:</th>
           <c:choose>
 		  	<c:when test="${not empty webhookTemplateBean.toolTipText}">
-	          <td style="width:85%;" colspan="5">${webhookTemplateBean.toolTipText}</td>
+	          <td style="width:35%;"><c:out value="${webhookTemplateBean.toolTipText}"/></td>
           	</c:when>
           	<c:otherwise>
-	          <td style="width:85%;" colspan="5"><i>none</i></td>
+	          <td style="width:35%;"><i>none</i></td>
+          	</c:otherwise>
+          </c:choose>         
+          
+          <th style="width:15%;">Template Status:</th>
+           
+          <c:choose>
+		  	<c:when test="${webhookTemplateBean.templateState.isStateUserOverridden()}">
+	          <td style="width:35%;" colspan=3><c:out value="${webhookTemplateBean.templateState.description}"/>. 
+	          <a href="./template-diff.html?template=${webhookTemplateBean.templateId}">Show differences</a></td>
+          	</c:when>
+          	<c:otherwise>
+	          <td style="width:35%;" colspan=3><c:out value="${webhookTemplateBean.templateState.description}"/></td>
           	</c:otherwise>
           </c:choose>          
         </tr>
@@ -155,6 +172,10 @@
 			<h2 id="templateHeading"></h2>
             <table class="templateDialogFormTable">
             	<tr><td>Build Events:</td>
+            		<td class="buildAddedToQueue" style="padding-left:3px;"><label style='white-space:nowrap;'><input class="buildState" id="buildAddedToQueue" name="BuildAddedToQueue" type=checkbox /> Build Added to Queue</label></td>
+            		<td class="buildRemovedFromQueue" style="padding-left:3px;"><label style='white-space:nowrap;'><input class="buildState" id="buildRemovedFromQueue" name="BuildRemovedFromQueue" type=checkbox /> Build Removed from Queue by User</label></td>
+            	</tr>
+            	<tr><td></td>
             		<td class="buildStarted" style="padding-left:3px;"><label style='white-space:nowrap;'><input class="buildState" id="buildStarted" name="BuildStarted" type=checkbox /> Build Started</label></td>
             		<td class="changesLoaded" style="padding-left:3px;"><label style='white-space:nowrap;'><input class="buildState" id="changesLoaded" name="ChangesLoaded" type=checkbox /> Changes Loaded</label></td>
             	</tr>
@@ -173,6 +194,10 @@
             	<tr><td></td>
             		<td class="buildFailed" style="padding-left:3px;"><label style='white-space:nowrap;'><input class="buildState" id="buildFailed" name="BuildFailed" type=checkbox /> Build Failed</label></td>
             		<td class="buildBroken" style="padding-left:3px;"><label style='white-space:nowrap;'><input class="buildState" id="buildBroken" name="BuildBroken" type=checkbox /> Build Broken</label></td>
+            	</tr>
+            	<tr><td></td>
+            		<td class="buildPinned" style="padding-left:3px;"><label style='white-space:nowrap;'><input class="buildState" id="buildPinned" name="BuildPinned" type=checkbox /> Build Pinned</label></td>
+            		<td class="buildUnpinned" style="padding-left:3px;"><label style='white-space:nowrap;'><input class="buildState" id="buildUnpinned" name="BuildUnpinned" type=checkbox /> Build Unpinned</label></td>
             	</tr>
                  <tr>
  					<td colspan="3">
@@ -227,25 +252,29 @@
     // trigger extension
     var langTools = ace.require("ace/ext/language_tools");
     var editor = ace.edit("editor");
-    editor.session.setMode("ace/mode/json");
-    editor.setTheme("ace/theme/xcode");
+    editor.session.setMode("ace/mode/jsonvelocity");
+    editor.setTheme("ace/theme/github");
     editor.$blockScrolling = Infinity;
     // enable autocompletion and snippets
     editor.setOptions({
         enableBasicAutocompletion: true,
         enableSnippets: true,
-        enableLiveAutocompletion: true
+        enableLiveAutocompletion: true,
+        useWorker: false,
+        showPrintMargin: false
     });
     
     var editorBranch = ace.edit("editorBranch");
-    editorBranch.session.setMode("ace/mode/json");
-    editorBranch.setTheme("ace/theme/xcode");
+    editorBranch.session.setMode("ace/mode/jsonvelocity");
+    editorBranch.setTheme("ace/theme/github");
     editorBranch.$blockScrolling = Infinity;
     // enable autocompletion and snippets
     editorBranch.setOptions({
         enableBasicAutocompletion: true,
         enableSnippets: true,
-        enableLiveAutocompletion: true
+        enableLiveAutocompletion: true,
+        useWorker: false,
+        showPrintMargin: false
     });
 
     var wordList = ["buildName", "buildFullName", "buildTypeId",
@@ -253,7 +282,9 @@
     				"projectName", "projectId", "projectInternalId", "projectExternalId", 
     				"buildStatus", "buildResult", "buildResultPrevious", "buildResultDelta", 
     				"buildStateDescription", "buildStatusUrl", "notifyType",
-					"buildComment", "buildRunners", "buildTags", "changes",  "comment", "triggeredBy",
+					"buildComment", "buildRunners", "buildTags", "changes",
+					"changeFileListCount", "maxChangeFileListSize", "maxChangeFileListCountExceeded",
+					"comment", "triggeredBy",
 					"buildStartTime", "currentTime",  
 					"branchName", "branchDisplayName", "branchIsDefault", "branch",
 					"text", "message",  "rootUrl", "buildStatusHtml", 
@@ -385,7 +416,8 @@
                              onsubmit="return WebHooksPlugin.DeleteTemplateDialog.doPost();">
 
             <table class="runnerFormTable">
-                <tr><td id="deleteTemplateWarningMessage">This is a default warning. You should not be seeing this. 
+                <tr><td>
+                	<div id="deleteTemplateWarningMessage">This is a default warning. You should not be seeing this.</div> 
                         <div id="ajaxTemplateDeleteResult"></div>
                 </td></tr>
             </table>
@@ -418,6 +450,28 @@
             </div>
         </forms:multipartForm>
     </bs:dialog>
+    
+    <bs:dialog dialogId="exportTemplateDialog"
+               dialogClass="exportTemplateDialog"
+               title="Export Template"
+               closeCommand="WebHooksPlugin.ExportTemplateDialog.close()">
+        <forms:multipartForm id="exportTemplateForm"
+                             action="/admin/manageWebhookTemplate.html"
+                             targetIframe="hidden-iframe"
+                             onsubmit="return WebHooksPlugin.ExportTemplateDialog.doPost();">
+
+            <table class="runnerFormTable">
+                <tr><td>Click the link below to export and download this template as JSON.<p>
+                		
+                		<a href="../../../app/rest/webhooks/templates/id:${webhookTemplateBean.templateId}/export?fields=$long,content">Download template...</a>
+		       
+                </td></tr>
+            </table>
+            <div class="popupSaveButtonsBlock">
+                <forms:cancel onclick="WebHooksPlugin.ExportTemplateDialog.close()"/>
+            </div>
+        </forms:multipartForm>
+    </bs:dialog>
 
     <bs:dialog dialogId="editTemplateDialog"
                dialogClass="editTemplateDialog"
@@ -431,10 +485,9 @@
             <table class="runnerFormTable">
                 <tr><td colspan=2>
                 	<div class="templateEdit">
-                			<p><strong>Are you sure you want to create a new template from scratch?</strong></p>
-                			<p>It might be easier to cancel this dialog and copy one of the existing templates.<p>
-                			<p>To copy an existing template, click &quot;view&quot; 
-                			on the template and choose &quot;Copy template...&quot; from the Actions menu on the next page.</p>
+                			<p><strong>Edit the fields below to modify template details</strong></p>
+                			<p>It is not possible to modify a template ID because it is referenced by webhook configurations. 
+                			Instead copy this template to a new ID by choosing &quot;Copy template...&quot; from the Actions menu on this page.</p>
                 	</div>
 
                 	<div class="templateCopy">
@@ -476,6 +529,20 @@
                         <div><input type="text" id="template.dateFormat" name="template.dateFormat"/></div>
                     </td>
                 </tr>
+                <tr class="templateDetails">
+                    <th>Payload Format</th>
+                    <td>
+                        <div>
+                        <select id="payloadFormat" name="template.payloadFormat">
+                        	<option value="">Choose a Payload Format...</option> 
+                        	<c:forEach items="${payloadFormats}" var="format">
+                        		<option value="<c:out value="${format.formatShortName}" />"><c:out value="${format.formatDescription}" /></option>
+                        	</c:forEach>
+                        </select>
+                        </div>
+                    </td>
+                </tr>
+                
             </table>
             <input type="hidden" name="action" id="WebHookTemplateAction" value="editTemplate"/>
             <div class="popupSaveButtonsBlock">

@@ -1,5 +1,5 @@
 <%@ include file="/include.jsp" %>
-<c:set var="title" value="WebHooks" scope="request"/>
+<c:set var="pageTitle" value="Edit WebHooks" scope="request"/>
 <bs:page>
 
     <jsp:attribute name="head_include">
@@ -15,7 +15,7 @@
     /css/userRoles.css
     
     ${jspHome}WebHook/css/styles.css
-    ${jspHome}WebHook/highlight/styles/tomorrow.css
+    ${jspHome}WebHook/3rd-party/highlight/styles/tomorrow.css
         
       </bs:linkCSS>
       <bs:linkScript>
@@ -33,22 +33,22 @@
         BS.Navigation.items = [
 		  {title: "Projects", url: '<c:url value="/overview.html"/>'},
 		  <c:if test="${haveProject}"> 
-		  	{title: "${projectName}", url: '<c:url value="/project.html?projectId=${projectExternalId}"/>'},
+		  	{title: "<c:out value="${projectName}"/>", url: '<c:url value="/project.html?projectId=${projectExternalId}"/>'},
 		  </c:if>
 		  <c:if test="${haveBuild}"> 
-		  	{title: "${buildName}", url: '<c:url value="/viewType.html?buildTypeId=${buildExternalId}"/>'},
+		  	{title: "<c:out value="${buildName}"/>", url: '<c:url value="/viewType.html?buildTypeId=${buildExternalId}"/>'},
 		  </c:if>
-          {title: "${title}", selected:true}
+          {title: "${pageTitle}", selected:true}
         ];
     
       </script>
     </jsp:attribute> 
       
     <jsp:attribute name="body_include">
-	<script type=text/javascript src="..${jspHome}WebHook/js/jquery.easytabs.min.js"></script>
-	<script type=text/javascript src="..${jspHome}WebHook/js/jquery.color.js"></script>
-	<script type=text/javascript src="..${jspHome}WebHook/js/moment-2.22.2.min.js"></script>
-	<script type=text/javascript src="..${jspHome}WebHook/highlight/highlight.pack.js"></script>
+	<script type=text/javascript src="..${jspHome}WebHook/3rd-party/jquery.easytabs.min.js"></script>
+	<script type=text/javascript src="..${jspHome}WebHook/3rd-party/jquery.color.js"></script>
+	<script type=text/javascript src="..${jspHome}WebHook/3rd-party/moment-2.22.2.min.js"></script>
+	<script type=text/javascript src="..${jspHome}WebHook/3rd-party/highlight/highlight.pack.js"></script>
 
 	<script type="text/javascript">
 	var webhookDialogWidth = -1;
@@ -61,9 +61,9 @@
 		});
 		
 		$j('#payloadFormatHolder').change(function() {
-			var formatName = $j(this).val();
-				$j.each(ProjectBuilds.templatesAndWebhooks.registeredTemplates.templateList, function(formatKey, template){
-				if (formatName === formatKey){
+			var templateId = $j(this).val();
+				$j.each(ProjectBuilds.templatesAndWebhooks.registeredTemplates.templateList, function(templateKey, template){
+				if (templateId === templateKey){
 					$j("#hookPane .buildState").each(function(thing, state){
 						if (($j.inArray(state.id, template.supportedStates) >= 0) &&
 							($j.inArray(state.id, template.supportedBranchStates) >= 0))
@@ -106,7 +106,7 @@
 	
 	function renderPreviewOnChange() {
 		if ($j('#payloadFormatHolder').val()) {
-			$j('#currentTemplateName').html(lookupTemplateName($j('#payloadFormatHolder').val()));
+			$j('#currentTemplateName').text(lookupTemplateName($j('#payloadFormatHolder').val()));
 		} else {
 			$j('#currentTemplateName').html("&nbsp;");
 		}
@@ -149,17 +149,21 @@
 									    "BUILD_FAILED" : true,
 									    "BUILD_BROKEN" : true,
 									    "BUILD_STARTED" : false,
+									    "BUILD_ADDED_TO_QUEUE" : false,
+									    "BUILD_REMOVED_FROM_QUEUE" : false,
 									    "BEFORE_BUILD_FINISHED" : false,
 									    "RESPONSIBILITY_CHANGED" : false,
 										"BUILD_FIXED" : true,
-									    "BUILD_INTERRUPTED" : false
+									    "BUILD_INTERRUPTED" : false,
+									    "BUILD_PINNED" : false,
+									    "BUILD_UNPINNED" : false
 								    }
 								}),
 					success:(function(data){
 									if(data.errored) {
 										$j('#webhookPreviewRendered').html(
-												"<b>An error occured building the payload preview</b><br><div style='padding:1em;'>" +
-												data.exception.detailMessage + "</div>");
+												"<b>An error occured building the payload preview</b><br>").append(
+												$j("<div style='padding:1em;'></div>").text(data.exception.detailMessage));
 									} else {
 										$j('#webhookPreviewRendered').html(data.html);
 										
@@ -182,11 +186,11 @@
     
         <c:choose>  
     		<c:when test="${haveBuild}"> 
-			    <h2 class="noBorder">WebHooks applicable to build ${buildName}</h2>
+			    <h2 class="noBorder">WebHooks applicable to build <c:out value="${buildName}"/></h2>
 			    To edit all webhooks for builds in the project <a href="index.html?projectId=${projectExternalId}">edit Project webhooks</a>.
          	</c:when>  
          	<c:otherwise>  
-			    <h2 class="noBorder">WebHooks configured for project ${projectName}</h2>
+			    <h2 class="noBorder">WebHooks configured for project <c:out value="${projectName}"/></h2>
          	</c:otherwise>  
 		</c:choose>  
 
@@ -262,10 +266,10 @@
 	        $('systemParams').updateContainer = function() {
         <c:choose>  
     		<c:when test="${haveBuild}"> 
-	          	$j.get("settingsList.html?buildTypeId=${buildExternalId}", function(data) {
+	          	$j.get("settingsList.html?buildTypeId=<c:out value="${buildExternalId}"/>", function(data) {
          	</c:when>  
          	<c:otherwise>  
-	          	$j.get("settingsList.html?projectId=${projectId}", function(data) {
+	          	$j.get("settingsList.html?projectId=<c:out value="${projectId}"/>", function(data) {
          	</c:otherwise>  
 		</c:choose>  	        
 	          		ProjectBuilds = data;

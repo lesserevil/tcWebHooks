@@ -23,6 +23,9 @@ import webhook.teamcity.payload.WebHookTemplateContent;
 import webhook.teamcity.payload.WebHookTemplateManager;
 import webhook.teamcity.payload.WebHookTemplateResolver;
 import webhook.teamcity.payload.format.WebHookPayloadJsonTemplate;
+import webhook.teamcity.payload.variableresolver.WebHookVariableResolverManager;
+import webhook.teamcity.payload.variableresolver.WebHookVariableResolverManagerImpl;
+import webhook.teamcity.payload.variableresolver.standard.WebHooksBeanUtilsVariableResolverFactory;
 import webhook.teamcity.settings.entity.WebHookTemplateJaxHelper;
 import webhook.teamcity.settings.entity.WebHookTemplateJaxTestHelper;
 import webhook.teamcity.settings.entity.WebHookTemplates;
@@ -39,6 +42,7 @@ public class SlackComCompactXmlWebHookTemplateTest {
 	private WebHookPayloadManager webHookPayloadManager;
 	private WebHookTemplateJaxHelper webHookTemplateJaxHelper;
 	private WebHookTemplateResolver webHookTemplateResolver;
+	private WebHookVariableResolverManager webHookVariableResolverManager; 
 
 	private WebHookPayload payloadFormat;
 	
@@ -51,12 +55,12 @@ public class SlackComCompactXmlWebHookTemplateTest {
 		slackCompact.register();
 		webHookTemplateManager.registerTemplateFormatFromSpring(slackCompact);
 		
-		WebHookContentBuilder webHookContentBuilder = new WebHookContentBuilder(webHookPayloadManager, webHookTemplateResolver);
+		WebHookContentBuilder webHookContentBuilder = new WebHookContentBuilder(server, webHookTemplateResolver, webHookVariableResolverManager);
 		
-		WebHookTemplateContent webHookTemplateContentChangesLoaded = webHookContentBuilder.findTemplateForState(sRunningBuild, BuildStateEnum.CHANGES_LOADED, slackCompact.getTemplateId(), payloadFormat);
+		WebHookTemplateContent webHookTemplateContentChangesLoaded = webHookContentBuilder.findTemplateForState(sRunningBuild, BuildStateEnum.CHANGES_LOADED, slackCompact.getTemplateId());
 		assertNotNull(webHookTemplateContentChangesLoaded);
 		
-		WebHookTemplateContent webHookTemplateContentSuccessful = webHookContentBuilder.findTemplateForState(sRunningBuild, BuildStateEnum.BUILD_SUCCESSFUL, slackCompact.getTemplateId(), payloadFormat);
+		WebHookTemplateContent webHookTemplateContentSuccessful = webHookContentBuilder.findTemplateForState(sRunningBuild, BuildStateEnum.BUILD_SUCCESSFUL, slackCompact.getTemplateId());
 		assertNotNull(webHookTemplateContentSuccessful);
 	}
 	
@@ -72,12 +76,12 @@ public class SlackComCompactXmlWebHookTemplateTest {
     	WebHookTemplates templatesList =  webHookTemplateJaxHelper.readTemplates("src/test/resources/testSlackCompactOverriden/webhook-templates.xml");
 		webHookTemplateManager.registerAllXmlTemplates(templatesList);
 		
-		WebHookContentBuilder webHookContentBuilder = new WebHookContentBuilder(webHookPayloadManager, webHookTemplateResolver);
+		WebHookContentBuilder webHookContentBuilder = new WebHookContentBuilder(server, webHookTemplateResolver, webHookVariableResolverManager);
 		
-		WebHookTemplateContent webHookTemplateContentChangesLoaded = webHookContentBuilder.findTemplateForState(sRunningBuild, BuildStateEnum.CHANGES_LOADED, slackCompact.getTemplateId(), payloadFormat);
+		WebHookTemplateContent webHookTemplateContentChangesLoaded = webHookContentBuilder.findTemplateForState(sRunningBuild, BuildStateEnum.CHANGES_LOADED, slackCompact.getTemplateId());
 		assertNull(webHookTemplateContentChangesLoaded);
 		
-		WebHookTemplateContent webHookTemplateContentSuccessful = webHookContentBuilder.findTemplateForState(sRunningBuild, BuildStateEnum.BUILD_SUCCESSFUL, slackCompact.getTemplateId(), payloadFormat);
+		WebHookTemplateContent webHookTemplateContentSuccessful = webHookContentBuilder.findTemplateForState(sRunningBuild, BuildStateEnum.BUILD_SUCCESSFUL, slackCompact.getTemplateId());
 		assertNotNull(webHookTemplateContentSuccessful);
 	}
 	
@@ -87,7 +91,9 @@ public class SlackComCompactXmlWebHookTemplateTest {
 		setupPayloadManagerAndRegisterJsonTemplate();
 		webHookTemplateJaxHelper = new WebHookTemplateJaxTestHelper();
 		webHookTemplateManager  = new WebHookTemplateManager(webHookPayloadManager, webHookTemplateJaxHelper);
-		webHookTemplateResolver = new WebHookTemplateResolver(webHookTemplateManager);
+		webHookTemplateResolver = new WebHookTemplateResolver(webHookTemplateManager, webHookPayloadManager);
+		webHookVariableResolverManager  = new WebHookVariableResolverManagerImpl();
+		webHookVariableResolverManager.registerVariableResolverFactory(new WebHooksBeanUtilsVariableResolverFactory());
 		setupSbuildMock();
 		
 	}
@@ -114,7 +120,7 @@ public class SlackComCompactXmlWebHookTemplateTest {
 
 	private void setupPayloadManagerAndRegisterJsonTemplate() {
 		webHookPayloadManager = new WebHookPayloadManager(server);
-		payloadFormat = new WebHookPayloadJsonTemplate(webHookPayloadManager);
+		payloadFormat = new WebHookPayloadJsonTemplate(webHookPayloadManager, webHookVariableResolverManager);
 		payloadFormat.register();
 	}
 	

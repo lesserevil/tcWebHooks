@@ -1,6 +1,7 @@
 package webhook.teamcity.server.rest.model.webhook;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
 
 import javax.xml.bind.annotation.XmlAccessType;
@@ -48,7 +49,7 @@ import webhook.teamcity.settings.WebHookConfig;
 @NoArgsConstructor
 @Getter @Setter
 @XmlAccessorType(XmlAccessType.FIELD)
-@XmlType (propOrder = { "url", "id", "projectId", "enabled", "format", "template", "webUrl", "href", "states", "parameters", "customTemplates", "authentication" })
+@XmlType (propOrder = { "url", "id", "projectId", "enabled", "template", "webUrl", "href", "states", "buildTypes", "parameters", "customTemplates", "authentication" })
 public class ProjectWebhook {
 	
 	@XmlAttribute
@@ -64,18 +65,18 @@ public class ProjectWebhook {
 	public String projectId;
 	
 	@XmlAttribute
-	public String format;
-	
-	@XmlAttribute
 	private String template;
 	
 	@XmlElement
 	public List<ProjectWebhookState> states;
-	
+
+	@XmlElement(name="buildTypes")
+	private ProjectWebHookBuildType buildTypes;
+
 	@XmlElement(name = "parameters")
 	private List<ProjectWebhookParameter> parameters;
 	
-	@XmlElement(name = "custom-templates")
+	@XmlElement(name = "customTemplates")
 	private List<CustomTemplate> customTemplates;
 	
 	@XmlElement(name = "authentication")
@@ -87,16 +88,16 @@ public class ProjectWebhook {
 	@XmlAttribute
 	public  String webUrl;
 
-	public ProjectWebhook(WebHookConfig config, final String projectExternalId, final @NotNull Fields fields, @NotNull final BeanContext beanContext) {
+	public ProjectWebhook(WebHookConfig config, final String projectExternalId, final @NotNull Fields fields, @NotNull final BeanContext beanContext, Collection<String> enabledBuildTypes) {
 		
 		this.url = ValueWithDefault.decideDefault(fields.isIncluded("url", true, true), config.getUrl()); 
 		this.id = ValueWithDefault.decideDefault(fields.isIncluded("id", true, true), config.getUniqueKey());
 		this.enabled = ValueWithDefault.decideDefault(fields.isIncluded("enabled", true, true), config.getEnabled());
 		this.projectId = ValueWithDefault.decideDefault(fields.isIncluded("projectId", false, true), projectExternalId);
-		this.format = ValueWithDefault.decideDefault(fields.isIncluded("format", true, true), config.getPayloadFormat());
 		this.template = ValueWithDefault.decideDefault(fields.isIncluded("template", true, true), config.getPayloadTemplate());
 		webUrl = ValueWithDefault.decideDefault(fields.isIncluded("webUrl", false, false), beanContext.getSingletonService(WebHookWebLinks.class).getWebHookUrl(projectExternalId));
 		href = ValueWithDefault.decideDefault(fields.isIncluded("href"), beanContext.getApiUrlBuilder().getHref(projectExternalId, config));
+		buildTypes = ValueWithDefault.decideDefault(fields.isIncluded("buildTypes", true, true), new ProjectWebHookBuildType(config.isEnabledForAllBuildsInProject(), config.isEnabledForSubProjects(), enabledBuildTypes));
 
 		if (fields.isIncluded("states", false, true)) {
 			states = new ArrayList<>();

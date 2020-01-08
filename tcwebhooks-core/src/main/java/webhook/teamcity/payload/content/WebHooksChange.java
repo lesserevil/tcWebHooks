@@ -3,25 +3,49 @@ package webhook.teamcity.payload.content;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.jetbrains.annotations.Nullable;
+
 import jetbrains.buildServer.vcs.SVcsModification;
 import jetbrains.buildServer.vcs.VcsFileModification;
-
+import jetbrains.buildServer.vcs.VcsRootInstance;
 
 public class WebHooksChange {
 
-	public static WebHooksChange build(SVcsModification modification) {
+	private static @Nullable String tryGetVcsRootName(final SVcsModification modification) {
+		if(modification.isPersonal()) {
+			return null;
+		}
+
+		final VcsRootInstance vcsRoot;
+		try {
+			vcsRoot = modification.getVcsRoot();
+		} catch(UnsupportedOperationException e) {
+			// Modifications tied to personal changes don't have a backing VCS root, and throw when trying
+			// to access getVcsRoot() (see issue #132)
+			return null;
+		}
+
+		return vcsRoot.getName();
+	}
+
+
+
+	public static WebHooksChange build(SVcsModification modification, boolean includeVcsFileModifications) {
 		WebHooksChange change = new WebHooksChange();
 		change.setComment(modification.getDescription());
 		change.setUsername(modification.getUserName());
-		change.setVcsRoot(modification.getVcsRoot().getName());
-		for (VcsFileModification fileModification: modification.getChanges()){
-			change.files.add(fileModification.getRelativeFileName());
+		change.setVcsRoot(tryGetVcsRootName(modification));
+		if (includeVcsFileModifications) {
+			change.files = new ArrayList<>();
+			for (VcsFileModification fileModification: modification.getChanges()){
+				change.files.add(fileModification.getRelativeFileName());
+			}
 		}
 		return change;
 	}
 
 
-	private List<String> files = new ArrayList<>();
+	private List<String> files;
 	private String comment;
 	private String username;
 	private String vcsRoot;
@@ -29,7 +53,7 @@ public class WebHooksChange {
 	private void setVcsRoot(String name) {
 		this.vcsRoot = name;
 	}
-	
+
 	public String getVcsRoot() {
 		return vcsRoot;
 	}

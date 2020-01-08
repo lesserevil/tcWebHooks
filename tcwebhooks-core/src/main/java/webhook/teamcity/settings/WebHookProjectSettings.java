@@ -49,7 +49,7 @@ public class WebHookProjectSettings implements ProjectSettings {
 				configs.add(whConfig);
 				Loggers.SERVER.debug(NAME + ":readFrom :: url " + whConfig.getUrl());
 				Loggers.SERVER.debug(NAME + ":readFrom :: enabled " + whConfig.getEnabled());
-				Loggers.SERVER.debug(NAME + ":readFrom :: payloadFormat " + whConfig.getPayloadFormat());
+				Loggers.SERVER.debug(NAME + ":readFrom :: payloadTemplate " + whConfig.getPayloadTemplate());
 	        }
 			this.webHooksConfigs = configs;
     	}
@@ -70,7 +70,7 @@ public class WebHookProjectSettings implements ProjectSettings {
                 parentElement.addContent(el);
 				Loggers.SERVER.debug(NAME + ":writeTo :: url " + whc.getUrl());
 				Loggers.SERVER.debug(NAME + ":writeTo :: enabled " + whc.getEnabled());
-				Loggers.SERVER.debug(NAME + ":writeTo :: payloadFormat " + whc.getPayloadFormat());
+				Loggers.SERVER.debug(NAME + ":writeTo :: payloadTemplate " + whc.getPayloadTemplate());
             }
 
         }
@@ -136,7 +136,7 @@ public class WebHookProjectSettings implements ProjectSettings {
         return new WebHookUpdateResult(updateSuccess, configToDelete);
     }
 
-	public WebHookUpdateResult updateWebHook(String projectId, String webHookId, String url, Boolean enabled, BuildState buildState, String format, String template, boolean buildTypeAll, boolean buildSubProjects, Set<String> buildTypesEnabled, WebHookAuthConfig webHookAuthConfig) {
+	public WebHookUpdateResult updateWebHook(String projectId, String webHookId, String url, Boolean enabled, BuildState buildState, String template, boolean buildTypeAll, boolean buildSubProjects, Set<String> buildTypesEnabled, WebHookAuthConfig webHookAuthConfig) {
 		boolean updateSuccess = false;
 		WebHookConfig configToUpdate = null;
         if(this.webHooksConfigs != null)
@@ -147,7 +147,6 @@ public class WebHookProjectSettings implements ProjectSettings {
                 	whc.setEnabled(enabled);
                 	whc.setUrl(url);
                 	whc.setBuildStates(buildState);
-                	whc.setPayloadFormat(format);
                 	whc.setPayloadTemplate(template);
                 	whc.enableForSubProjects(buildSubProjects);
                 	whc.enableForAllBuildsInProject(buildTypeAll);
@@ -177,12 +176,12 @@ public class WebHookProjectSettings implements ProjectSettings {
         return new WebHookUpdateResult(updateSuccess, configToUpdate);
 	}
 
-	public void addNewWebHook(String projectInternalId, String projectExternalId, String url, Boolean enabled, BuildState buildState, String format, String template, boolean buildTypeAll, boolean buildTypeSubProjects, Set<String> buildTypesEnabled) {
-		addNewWebHook(projectInternalId, projectExternalId, url, enabled, buildState, format, template, buildTypeAll, buildTypeSubProjects, buildTypesEnabled, null);
+	public void addNewWebHook(String projectInternalId, String projectExternalId, String url, Boolean enabled, BuildState buildState, String template, boolean buildTypeAll, boolean buildTypeSubProjects, Set<String> buildTypesEnabled) {
+		addNewWebHook(projectInternalId, projectExternalId, url, enabled, buildState, template, buildTypeAll, buildTypeSubProjects, buildTypesEnabled, null);
 	}
 	
-	public WebHookUpdateResult addNewWebHook(String projectInternalId, String projectExternalId, String url, Boolean enabled, BuildState buildState, String format, String template, boolean buildTypeAll, boolean buildTypeSubProjects, Set<String> buildTypesEnabled, WebHookAuthConfig webHookAuthConfig) {
-		WebHookConfig newWebHook = new WebHookConfig(projectInternalId, projectExternalId, url, enabled, buildState, format, template, buildTypeAll, buildTypeSubProjects, buildTypesEnabled, webHookAuthConfig); 
+	public WebHookUpdateResult addNewWebHook(String projectInternalId, String projectExternalId, String url, Boolean enabled, BuildState buildState, String template, boolean buildTypeAll, boolean buildTypeSubProjects, Set<String> buildTypesEnabled, WebHookAuthConfig webHookAuthConfig) {
+		WebHookConfig newWebHook = new WebHookConfig(projectInternalId, projectExternalId, url, enabled, buildState, template, buildTypeAll, buildTypeSubProjects, buildTypesEnabled, webHookAuthConfig); 
 		this.webHooksConfigs.add(newWebHook);
 		Loggers.SERVER.debug(NAME + ":addNewWebHook :: Adding webhook to " + projectExternalId + " with URL " + url);
 		return new WebHookUpdateResult(true, newWebHook);
@@ -211,15 +210,4 @@ public class WebHookProjectSettings implements ProjectSettings {
 		return webHooksConfigs;
 	}
 	
-	@Getter
-	public class WebHookUpdateResult {
-		boolean updated;
-		WebHookConfig webHookConfig;
-		
-		public WebHookUpdateResult(Boolean updated, WebHookConfig webHookConfig) {
-			this.updated = updated;
-			this.webHookConfig = webHookConfig;
-		}
-	}
-
 }

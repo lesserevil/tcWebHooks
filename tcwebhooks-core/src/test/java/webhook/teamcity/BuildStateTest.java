@@ -46,6 +46,8 @@ public class BuildStateTest {
 	@Test
 	public void testAllEnabled_02(){
 		BuildState state = new BuildState();
+		state.enable(BUILD_ADDED_TO_QUEUE);
+		state.enable(BUILD_REMOVED_FROM_QUEUE);
 		state.enable(BUILD_STARTED);
 		state.enable(CHANGES_LOADED);
 		state.enable(BUILD_INTERRUPTED);
@@ -54,6 +56,8 @@ public class BuildStateTest {
 		state.enable(BUILD_FINISHED);
 		state.enable(BUILD_FAILED);
 		state.enable(BUILD_SUCCESSFUL);
+		state.enable(BUILD_PINNED);
+		state.enable(BUILD_UNPINNED);
 		assertTrue(state.allEnabled());
 	}
 

@@ -6,28 +6,33 @@ import static webhook.teamcity.BuildStateEnum.BUILD_FINISHED;
 import static webhook.teamcity.BuildStateEnum.BUILD_FIXED;
 import static webhook.teamcity.BuildStateEnum.BUILD_SUCCESSFUL;
 
-import java.util.HashMap;
+import java.util.EnumMap;
 import java.util.Map;
 import java.util.Set;
 
 public class BuildState {
 
-	Map<BuildStateEnum, BuildStateInterface> states = new HashMap<>();
+	Map<BuildStateEnum, BuildStateInterface> states = new EnumMap<>(BuildStateEnum.class);
 	
 	public BuildState() {
 		states.clear();
-		states.put(BuildStateEnum.BUILD_STARTED, 			new SimpleBuildState(BuildStateEnum.BUILD_STARTED, 			false));
-		states.put(BuildStateEnum.CHANGES_LOADED, 			new SimpleBuildState(BuildStateEnum.CHANGES_LOADED, 		false));
-		states.put(BuildStateEnum.BEFORE_BUILD_FINISHED, 	new SimpleBuildState(BuildStateEnum.BEFORE_BUILD_FINISHED, 	false)); 
-		states.put(BuildStateEnum.RESPONSIBILITY_CHANGED, 	new SimpleBuildState(BuildStateEnum.RESPONSIBILITY_CHANGED,	false));
-		states.put(BuildStateEnum.BUILD_INTERRUPTED, 		new SimpleBuildState(BuildStateEnum.BUILD_INTERRUPTED, 		false));
-		states.put(BuildStateEnum.BUILD_SUCCESSFUL, 		new SimpleBuildState(BuildStateEnum.BUILD_SUCCESSFUL, 		false));
-		states.put(BuildStateEnum.BUILD_FAILED, 			new SimpleBuildState(BuildStateEnum.BUILD_FAILED, 			false));
-
-		states.put(BuildStateEnum.BUILD_BROKEN, 			new SimpleBuildState(BuildStateEnum.BUILD_BROKEN, 			false));
-		states.put(BuildStateEnum.BUILD_FIXED, 				new SimpleBuildState(BuildStateEnum.BUILD_FIXED, 			false));
 		
-		states.put(BuildStateEnum.BUILD_FINISHED, 			new SimpleBuildState(BuildStateEnum.BUILD_FINISHED, 		false)); 		
+		states.put(BuildStateEnum.BUILD_ADDED_TO_QUEUE, 	new SimpleBuildState(BuildStateEnum.BUILD_ADDED_TO_QUEUE, 		false));
+		states.put(BuildStateEnum.BUILD_REMOVED_FROM_QUEUE, new SimpleBuildState(BuildStateEnum.BUILD_REMOVED_FROM_QUEUE,	false));
+		states.put(BuildStateEnum.BUILD_STARTED, 			new SimpleBuildState(BuildStateEnum.BUILD_STARTED, 				false));
+		states.put(BuildStateEnum.CHANGES_LOADED, 			new SimpleBuildState(BuildStateEnum.CHANGES_LOADED, 			false));
+		states.put(BuildStateEnum.BEFORE_BUILD_FINISHED, 	new SimpleBuildState(BuildStateEnum.BEFORE_BUILD_FINISHED, 		false)); 
+		states.put(BuildStateEnum.RESPONSIBILITY_CHANGED, 	new SimpleBuildState(BuildStateEnum.RESPONSIBILITY_CHANGED,		false));
+		states.put(BuildStateEnum.BUILD_INTERRUPTED, 		new SimpleBuildState(BuildStateEnum.BUILD_INTERRUPTED, 			false));
+		states.put(BuildStateEnum.BUILD_SUCCESSFUL, 		new SimpleBuildState(BuildStateEnum.BUILD_SUCCESSFUL, 			false));
+		states.put(BuildStateEnum.BUILD_FAILED, 			new SimpleBuildState(BuildStateEnum.BUILD_FAILED, 				false));
+
+		states.put(BuildStateEnum.BUILD_BROKEN, 			new SimpleBuildState(BuildStateEnum.BUILD_BROKEN, 				false));
+		states.put(BuildStateEnum.BUILD_FIXED, 				new SimpleBuildState(BuildStateEnum.BUILD_FIXED, 				false));
+		
+		states.put(BuildStateEnum.BUILD_FINISHED, 			new SimpleBuildState(BuildStateEnum.BUILD_FINISHED, 			false)); 		
+		states.put(BuildStateEnum.BUILD_PINNED, 			new SimpleBuildState(BuildStateEnum.BUILD_PINNED, 				false)); 		
+		states.put(BuildStateEnum.BUILD_UNPINNED, 			new SimpleBuildState(BuildStateEnum.BUILD_UNPINNED, 			false)); 		
 	}
 	
 	public Set<BuildStateEnum> getStateSet(){
@@ -75,7 +80,7 @@ public class BuildState {
      * @param currentBuildState
      * @param success
      * @param changed
-     * @return The WebHook state for use detemining template etc.
+     * @return The WebHook state for use determining template etc.
      */
     public static BuildStateEnum getEffectiveState(BuildStateEnum currentBuildState, boolean success, boolean changed){
     	
@@ -153,47 +158,44 @@ public class BuildState {
 
 	public boolean allEnabled() {
 		boolean areAllEnbled = true;
-		for (BuildStateEnum state : states.keySet()){
-			if (state.equals(BUILD_BROKEN)){
-				if (states.get(BUILD_BROKEN).isEnabled()){
+		for (Map.Entry<BuildStateEnum,BuildStateInterface> state : states.entrySet()){
+			if (state.getKey().equals(BUILD_BROKEN)){
+				if (state.getValue().isEnabled()){
 					return false;
 				}
 				continue;
 			}
-			if (state.equals(BUILD_FIXED)){
-				if (states.get(BUILD_FIXED).isEnabled()){
+			if (state.getKey().equals(BUILD_FIXED)){
+				if (state.getValue().isEnabled()){
 					return false;
 				}
 				continue;
 			}
-			areAllEnbled = areAllEnbled && states.get(state).isEnabled();  
+			areAllEnbled = areAllEnbled && state.getValue().isEnabled();  
 		}
 		return areAllEnbled;
 	}
 
 	public boolean noneEnabled() {
 		int enabled = 0;
-		for (BuildStateEnum state : states.keySet()){
-			if (state.equals(BUILD_BROKEN)){
-				continue;
-			}
-			if (state.equals(BUILD_FIXED)){
-				continue;
-			}
-			if (state.equals(BUILD_SUCCESSFUL)){
-				continue;
-			}
-			if (state.equals(BUILD_FAILED)){
+		for (Map.Entry<BuildStateEnum,BuildStateInterface> state : states.entrySet()){
+			if (
+				   state.getKey().equals(BUILD_BROKEN)
+				|| state.getKey().equals(BUILD_FIXED)
+				|| state.getKey().equals(BUILD_SUCCESSFUL)
+				|| state.getKey().equals(BUILD_FAILED)
+			)
+			{
 				continue;
 			}
 			
-			if (state.equals(BUILD_FINISHED)){
+			if (state.getKey().equals(BUILD_FINISHED)){
 				if (finishEnabled()){
 					enabled++;
 				}
 				continue;
 			}
-			if (states.get(state).isEnabled())  
+			if (state.getValue().isEnabled())  
 				enabled++;
 		}
 		return enabled == 0;

@@ -11,6 +11,7 @@ import javax.xml.bind.JAXBException;
 import webhook.teamcity.Loggers;
 import webhook.teamcity.ProbableJaxbJarConflictErrorException;
 import webhook.teamcity.payload.template.WebHookTemplateFromXml;
+import webhook.teamcity.settings.WebHookSettingsManager;
 import webhook.teamcity.settings.config.WebHookTemplateConfig;
 import webhook.teamcity.settings.config.builder.WebHookTemplateConfigBuilder;
 import webhook.teamcity.settings.entity.WebHookTemplateEntity;
@@ -22,15 +23,18 @@ public class WebHookTemplateManager {
 	private static final String TEMPLATES_ARE_RANKED_IN_THE_FOLLOWING_ORDER = " items long. Templates are ranked in the following order..";
 	private static final String TEMPLATE_NAME = " :: Template Name: ";
 	private static final String TEMPLATES_LIST_IS = " :: Templates list is ";
-	HashMap<String, WebHookPayloadTemplate> springTemplates = new HashMap<>();
-	HashMap<String, WebHookPayloadTemplate> xmlConfigTemplates = new HashMap<>();
-	Comparator<WebHookPayloadTemplate> rankComparator = new WebHookTemplateRankingComparator();
-	List<WebHookPayloadTemplate> orderedTemplateCollection = new ArrayList<>();
-	WebHookPayloadManager webHookPayloadManager;
-	WebHookTemplateJaxHelper webHookTemplateJaxHelper;
+	private HashMap<String, WebHookPayloadTemplate> springTemplates = new HashMap<>();
+	private HashMap<String, WebHookPayloadTemplate> xmlConfigTemplates = new HashMap<>();
+	private Comparator<WebHookPayloadTemplate> rankComparator = new WebHookTemplateRankingComparator();
+	private List<WebHookPayloadTemplate> orderedTemplateCollection = new ArrayList<>();
+	private final WebHookPayloadManager webHookPayloadManager;
+	private final WebHookTemplateJaxHelper webHookTemplateJaxHelper;
 	private String configFilePath;
 	
-	public WebHookTemplateManager(WebHookPayloadManager webHookPayloadManager, WebHookTemplateJaxHelper webHookTemplateJaxHelper){
+	public WebHookTemplateManager(
+			WebHookPayloadManager webHookPayloadManager, 
+			WebHookTemplateJaxHelper webHookTemplateJaxHelper)
+	{
 		this.webHookPayloadManager = webHookPayloadManager;
 		this.webHookTemplateJaxHelper = webHookTemplateJaxHelper;
 		Loggers.SERVER.info("WebHookTemplateManager :: Starting (" + toString() + ")");
@@ -150,13 +154,23 @@ public class WebHookTemplateManager {
 		}
 	}
 	
-	public WebHookTemplateConfig getTemplateConfig(String formatShortname){
+	public WebHookTemplateConfig getTemplateConfig(String templateId, TemplateState templateState){
 		synchronized (orderedTemplateCollection) {
-			if (xmlConfigTemplates.containsKey(formatShortname)){
-				return WebHookTemplateConfigBuilder.buildConfig(xmlConfigTemplates.get(formatShortname).getAsEntity());
+			if (springTemplates.containsKey(templateId) 
+					&& xmlConfigTemplates.containsKey(templateId)
+					&& TemplateState.PROVIDED.equals(templateState))
+			{
+				return WebHookTemplateConfigBuilder.buildConfig(springTemplates.get(templateId).getAsEntity());
 			}
-			if (springTemplates.containsKey(formatShortname)){
-				return WebHookTemplateConfigBuilder.buildConfig(springTemplates.get(formatShortname).getAsEntity());
+			if (xmlConfigTemplates.containsKey(templateId) 
+				&& ( TemplateState.BEST.equals(templateState) || getTemplateState(templateId, templateState).equals(templateState)))
+			{
+				return WebHookTemplateConfigBuilder.buildConfig(xmlConfigTemplates.get(templateId).getAsEntity());
+			}
+			if (springTemplates.containsKey(templateId)
+				&& ( TemplateState.BEST.equals(templateState) || TemplateState.PROVIDED.equals(templateState) || getTemplateState(templateId, templateState).equals(templateState)))
+			{
+				return WebHookTemplateConfigBuilder.buildConfig(springTemplates.get(templateId).getAsEntity());
 			}
 			return null;
 		}
@@ -180,18 +194,8 @@ public class WebHookTemplateManager {
 		return orderedEntities;
 	}
 
-	public List<WebHookPayloadTemplate> findAllTemplatesForFormat(String formatShortName){
-		List<WebHookPayloadTemplate> matchingTemplates = new ArrayList<>();
-		for (WebHookPayloadTemplate template : orderedTemplateCollection){
-			if (template.supportsPayloadFormat(formatShortName)){
-				matchingTemplates.add(template);
-			}
-		}
-		return matchingTemplates;
-	}
-	
-	public TemplateState getTemplateState(String template){
-		if (springTemplates.containsKey(template) && xmlConfigTemplates.containsKey(template)){
+	public TemplateState getTemplateState(String template, TemplateState templateState){
+		if ((TemplateState.BEST.equals(templateState) || TemplateState.USER_OVERRIDDEN.equals(templateState)) && springTemplates.containsKey(template) && xmlConfigTemplates.containsKey(template)){
 			return TemplateState.USER_OVERRIDDEN;
 		} else if (springTemplates.containsKey(template)){
 			return TemplateState.PROVIDED;
@@ -205,6 +209,7 @@ public class WebHookTemplateManager {
 		PROVIDED 		("Template bundled with tcWebhooks"), 
 		USER_DEFINED 	("User defined template"), 
 		USER_OVERRIDDEN ("Overridden by user defined template"), 
+		BEST			("Template in its most specific state"), // Only used for finding. Template will never actually be in this state. 
 		UNKNOWN			("Unknown origin");
 		
 		private final String description;
@@ -231,6 +236,10 @@ public class WebHookTemplateManager {
 		public boolean isStateUnknown()
 		{
 			return TemplateState.UNKNOWN.equals(this);
+		}
+		public boolean isStateAny()
+		{
+			return TemplateState.BEST.equals(this);
 		}
 	}
 

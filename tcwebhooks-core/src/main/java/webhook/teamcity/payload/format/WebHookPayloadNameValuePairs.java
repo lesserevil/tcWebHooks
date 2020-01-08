@@ -1,45 +1,43 @@
-/**
- * 
- */
 package webhook.teamcity.payload.format;
 
 import java.io.UnsupportedEncodingException;
 import java.lang.reflect.InvocationTargetException;
 import java.net.URLEncoder;
-import java.util.Iterator;
 import java.util.Map;
 
 import org.apache.commons.beanutils.BeanUtils;
 
 import webhook.teamcity.Loggers;
+import webhook.teamcity.payload.PayloadTemplateEngineType;
 import webhook.teamcity.payload.WebHookPayload;
 import webhook.teamcity.payload.WebHookPayloadManager;
 import webhook.teamcity.payload.WebHookTemplateContent;
 import webhook.teamcity.payload.content.WebHookPayloadContent;
 import webhook.teamcity.payload.template.render.WebHookStringRenderer;
 import webhook.teamcity.payload.template.render.WwwFormUrlEncodedToHtmlPrettyPrintingRenderer;
+import webhook.teamcity.payload.variableresolver.WebHookVariableResolverManager;
 
 
 public class WebHookPayloadNameValuePairs extends WebHookPayloadGeneric implements WebHookPayload {
-	
+
 	public static final String FORMAT_SHORT_NAME = "nvpairs";
 	public static final String FORMAT_CONTENT_TYPE = "application/x-www-form-urlencoded";
 
-	public WebHookPayloadNameValuePairs(WebHookPayloadManager manager) {
-		super(manager);
+	public WebHookPayloadNameValuePairs(WebHookPayloadManager manager, WebHookVariableResolverManager variableResolverManager) {
+		super(manager, variableResolverManager);
 	}
 
 	Integer rank = 100;
 	String charset = "UTF-8";
-	
+
 	public void setPayloadManager(WebHookPayloadManager manager){
 		myManager = manager;
 	}
-	
+
 	public void register(){
 		myManager.registerPayloadFormat(this);
 	}
-	
+
 	public String getFormatDescription() {
 		return "Name Value Pairs";
 	}
@@ -55,72 +53,54 @@ public class WebHookPayloadNameValuePairs extends WebHookPayloadGeneric implemen
 	@SuppressWarnings("unchecked")
 	@Override
 	protected String getStatusAsString(WebHookPayloadContent content, WebHookTemplateContent webHookTemplateContent){
-		String returnString = ""; 
-		
+		StringBuilder returnString = new StringBuilder();
+
+		cleanContextContent(content);
+
 		Map<String, String> contentMap = null;
 		try {
 			 contentMap = BeanUtils.describe(content);
 		} catch (IllegalAccessException | InvocationTargetException | NoSuchMethodException ex) {
 			Loggers.SERVER.debug("It was not possible to convert 'content' into a bean", ex );
 		}
-		
+
 		if (contentMap != null && contentMap.size() > 0){
-			
-			for(Iterator<String> param = contentMap.keySet().iterator(); param.hasNext();)
-			{
-				String key = param.next();
-				String pair = "&";
-				try {
-					if (key != null){
-						pair += URLEncoder.encode(key, this.charset);
-						if (contentMap.get(key) != null){
-							pair += "=" + URLEncoder.encode((String)contentMap.get(key), this.charset);
-						} else {
-							pair += "=" + URLEncoder.encode("null", this.charset);
-						}
-					}
-				} catch (UnsupportedEncodingException | ClassCastException ex ){
-					pair = "";
-					Loggers.SERVER.debug("failed to encode 'content' parameter '" + key + "' to URL format. Value has been converted to an empty string", ex );
-				}
-				returnString += pair;
-			}
-		
+			appendToBuilder(returnString, contentMap, "content");
 		}
-		
-		if (content != null && content.getExtraParameters() != null  && content.getExtraParameters().size() > 0){
-			
-			for(Iterator<String> param = content.getExtraParameters().keySet().iterator(); param.hasNext();)
-			{
-				String key = param.next();
-				String pair = "&";
-				try {
-					if (key != null){
-						pair += URLEncoder.encode(key, this.charset);
-						if (content.getExtraParameters().get(key) != null){
-							pair += "=" + URLEncoder.encode((String)content.getExtraParameters().get(key), this.charset);
-						} else {
-							pair += "=" + URLEncoder.encode("null", this.charset);
-						}
-					}
-				} catch (UnsupportedEncodingException | ClassCastException ex ) {
-					pair = "";
-					Loggers.SERVER.debug("failed to encode 'extra' parameter '" + key + "' to URL format. Value has been converted to an empty string.", ex );
-				}
-				returnString += pair;
-				Loggers.SERVER.debug(this.getClass().getSimpleName() + ": payload is " + returnString);
-			}
+
+
+		if (content != null && content.getExtraParameters(this.myVariableResolverFactory) != null  && content.getExtraParameters(this.myVariableResolverFactory).size() > 0){
+			appendToBuilder(returnString, content.getExtraParameters(myVariableResolverFactory), "extra");
 		}
-		
-		Loggers.SERVER.debug(this.getClass().getSimpleName() + ": payload is " + returnString);
+
+		Loggers.SERVER.debug(this.getClass().getSimpleName() + ": payload is " + returnString.toString());
 		if (returnString.length() > 0){
-			return returnString.substring(1);
+			return returnString.toString().substring(1);
 		} else {
-			return returnString;
+			return returnString.toString();
 		}
 	}
 
-
+	private void appendToBuilder(StringBuilder stringBuilder, Map<String,String> inputMap, String logType) {
+		for(Map.Entry<String, String> entry : inputMap.entrySet())
+		{
+			String pair = "&";
+			try {
+				if (entry.getKey() != null){
+					pair += URLEncoder.encode(entry.getKey(), this.charset);
+					if (entry.getValue() != null){
+						pair += "=" + URLEncoder.encode(entry.getValue(), this.charset);
+					} else {
+						pair += "=" + URLEncoder.encode("null", this.charset);
+					}
+				}
+			} catch (UnsupportedEncodingException | ClassCastException ex ) {
+				pair = "";
+				Loggers.SERVER.debug("failed to encode '" + logType + "' parameter '" + entry.getKey() + "' to URL format. Value has been converted to an empty string.", ex );
+			}
+			stringBuilder.append(pair);
+		}
+	}
 
 	public String getContentType() {
 		return FORMAT_CONTENT_TYPE;
@@ -142,5 +122,10 @@ public class WebHookPayloadNameValuePairs extends WebHookPayloadGeneric implemen
 	public WebHookStringRenderer getWebHookStringRenderer() {
 		return new WwwFormUrlEncodedToHtmlPrettyPrintingRenderer();
 	}
-	
+
+	@Override
+	public PayloadTemplateEngineType getTemplateEngineType() {
+		return PayloadTemplateEngineType.LEGACY;
+	}
+
 }

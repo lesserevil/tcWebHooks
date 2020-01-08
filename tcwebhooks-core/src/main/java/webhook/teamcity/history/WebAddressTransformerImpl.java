@@ -3,6 +3,7 @@ package webhook.teamcity.history;
 import java.net.Inet4Address;
 import java.net.Inet6Address;
 import java.net.InetAddress;
+import java.net.MalformedURLException;
 import java.net.URL;
 
 import org.jetbrains.annotations.Nullable;
@@ -10,15 +11,11 @@ import org.jetbrains.annotations.Nullable;
 import com.google.common.net.InetAddresses;
 import com.google.common.net.InternetDomainName;
 
-
 public class WebAddressTransformerImpl implements WebAddressTransformer {
-	
+
 	@Override
 	public GeneralisedWebAddress getGeneralisedHostName(URL url) {
 		String host = url.getHost();
-//		if (! url.getHost().contains(".")) {
-//			return GeneralisedWebAddress.build(host, GeneralisedWebAddressType.HOST_ADDRESS);
-//		} else 
 		InetAddress ip = extractInetAddress(host);
 		if (ip != null) {
 			if (ip instanceof Inet4Address ) {
@@ -26,7 +23,7 @@ public class WebAddressTransformerImpl implements WebAddressTransformer {
 			} else if (ip instanceof Inet6Address) {
 				return GeneralisedWebAddress.build(ip.getHostAddress(), GeneralisedWebAddressType.IPV6_ADDRESS);
 			}
-		} else if (InternetDomainName.isValid(host)) { 
+		} else if (InternetDomainName.isValid(host)) {
 			InternetDomainName domainName = InternetDomainName.from(host);
 			if (domainName.isUnderPublicSuffix()) {
 				return GeneralisedWebAddress.build(domainName.topPrivateDomain().toString(), GeneralisedWebAddressType.DOMAIN_NAME);
@@ -35,8 +32,21 @@ public class WebAddressTransformerImpl implements WebAddressTransformer {
 			}
 			return GeneralisedWebAddress.build(host, GeneralisedWebAddressType.HOST_ADDRESS);
 		}
-		
+
 		return null;
+	}
+
+	@Override
+	public GeneralisedWebAddress getGeneralisedHostName(String url) {
+		try {
+			if (url != null && !url.trim().isEmpty()) {
+				return getGeneralisedHostName(new URL(url));
+			} else {
+				return getGeneralisedHostName(new URL("http://undefined"));
+			}
+		} catch (MalformedURLException e) {
+			return GeneralisedWebAddress.build("invalidUrl", GeneralisedWebAddressType.HOST_ADDRESS);
+		}
 	}
 	
 	@Nullable
