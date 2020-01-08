@@ -23,6 +23,8 @@ public class WebHooksChange {
 			// Modifications tied to personal changes don't have a backing VCS root, and throw when trying
 			// to access getVcsRoot() (see issue #132)
 			return null;
+		} catch(Exception e) {
+			return null;
 		}
 
 		return vcsRoot.getName();
