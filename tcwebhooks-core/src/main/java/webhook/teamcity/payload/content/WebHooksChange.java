@@ -19,6 +19,7 @@ public class WebHooksChange {
 		final VcsRootInstance vcsRoot;
 		try {
 			vcsRoot = modification.getVcsRoot();
+			return vcsRoot.getName();
 		} catch(UnsupportedOperationException e) {
 			// Modifications tied to personal changes don't have a backing VCS root, and throw when trying
 			// to access getVcsRoot() (see issue #132)
@@ -27,7 +28,7 @@ public class WebHooksChange {
 			return null;
 		}
 
-		return vcsRoot.getName();
+		
 	}
 
 
