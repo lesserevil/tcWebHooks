@@ -1,22 +1,24 @@
 package webhook.teamcity.payload.util;
 
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
 
 import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.SortedMap;
 import java.util.TreeMap;
 
+import org.junit.Before;
+
 import jetbrains.buildServer.messages.Status;
 import jetbrains.buildServer.serverSide.SBuildServer;
 import jetbrains.buildServer.serverSide.SFinishedBuild;
-
-import org.junit.Before;
-
 import webhook.teamcity.MockSBuildType;
 import webhook.teamcity.MockSProject;
 import webhook.teamcity.MockSRunningBuild;
 import webhook.teamcity.payload.content.ExtraParametersMap;
+import webhook.teamcity.payload.variableresolver.VariableResolverFactory;
+import webhook.teamcity.payload.variableresolver.standard.WebHooksBeanUtilsVariableResolverFactory;
 
 public class VariableMessageBuilderTestBase {
 
@@ -28,6 +30,7 @@ public class VariableMessageBuilderTestBase {
 	protected SortedMap<String, String> extraParameters;
 	protected SortedMap<String, String> teamcityProperties;
 	protected Map<String, ExtraParametersMap> allProperties;
+	protected VariableResolverFactory variableResolverFactory = new WebHooksBeanUtilsVariableResolverFactory();
 
 	@Before
 	public void setup() {
@@ -49,6 +52,7 @@ public class VariableMessageBuilderTestBase {
 		teamcityProperties.put("config", "This is some config thing");
 		teamcityProperties.put("builder.appVersion", "This is the appVersion");
 		sBuildServer = mock(SBuildServer.class);
+		when(sBuildServer.getRootUrl()).thenReturn("http://test.url");
 		allProperties = new LinkedHashMap<>();
 		allProperties.put("teamcity", new ExtraParametersMap(teamcityProperties));
 		allProperties.put("webhook", new ExtraParametersMap(extraParameters));

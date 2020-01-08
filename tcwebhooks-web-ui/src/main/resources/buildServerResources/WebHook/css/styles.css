@@ -27,6 +27,10 @@ label.webhookEnabled {
 	padding: 0em;
 }
 
+tr.webHookRow:hover, tr.webHookRowTemplate:hover, tr.newWebHookRow:hover {
+	background-color: rgb(250, 250, 250);
+}
+
 .webHookRowTemplate {
 	display:none;
 }
@@ -40,7 +44,7 @@ label.webhookEnabled {
 	white-space: pre-wrap;
 	word-wrap: break-word;
 	overflow: scroll;
-	
+
 }
 
 #currentTemplatePreview {
@@ -49,14 +53,14 @@ label.webhookEnabled {
 }
 
 #webhookPreviewRendered pre .hljs,
-#currentTemplatePreview pre code.hljs, 
+#currentTemplatePreview pre code.hljs,
 .endpointPayload pre code.hljs {
 	overflow-x: visible;
 }
 
-#webhookPreviewRenderedAjaxResult, 
-#previewTempleteItemDialogAjaxResult, 
-#webhookDialogAjaxResult, 
+#webhookPreviewRenderedAjaxResult,
+#previewTempleteItemDialogAjaxResult,
+#webhookDialogAjaxResult,
 #webhookTestProgress {
 	padding: 1.5em;
 }
@@ -75,7 +79,7 @@ ul.commalist {
   display: inline;
   list-style: none;
   padding:0;
-  
+
 }
 
 ul.commalist li {
@@ -104,11 +108,11 @@ table#webHookTemplateTable th {
 
 table#webHookTemplateTable td{
 	padding:1em;
-} 
+}
 
 
 table#webHookTemplateTable tr:hover td {
-	background-color: #eeeeee !important;
+	background-color: rgb(250, 250, 250) !important;
 }
 
 #table.endpointRequestsTable {
@@ -132,7 +136,7 @@ div.endpointPayloadHeader {
 	background-color: rgb(245, 245, 245);
 	border-bottom: 1px solid #ccc;
 	padding: 0.5em;
-	
+
 }
 
 ul.payloadHeading {
@@ -154,8 +158,8 @@ li.payloadContentType {
 }
 
 div.endpointPayload pre {
-	margin:0px; 
-	border:none; 
+	margin:0px;
+	border:none;
 	border-right:none;
     height: auto;
     max-height: 500px;
@@ -173,14 +177,14 @@ div.endpointPayloadHidden {
 }
 
 div.endpointPayload div.tableWrapper table.settings {
-	margin-top:0px; 
-	border:none; 
+	margin-top:0px;
+	border:none;
 	border-right:none;
 }
 
 div.endpointPayload div.tableWrapper {
-	margin-top:0px; 
-	border:none; 
+	margin-top:0px;
+	border:none;
 	border-right:none;
 	height: auto;
     max-height: 500px;
@@ -200,7 +204,7 @@ div.endpointPayload div.tableWrapper table.settings th :last-child, div.endpoint
 }
 
 div.endpointPayloadHeader {
-	cursor: pointer; 
+	cursor: pointer;
 }
 
 div.endpointPayloadHeaders {
@@ -222,7 +226,7 @@ div.endpointPayloadHeaders table td {
 
 div.endpointPayloadHeaders table tr :first-child {
 	text-align:right;
-	font-weight: bold;	
+	font-weight: bold;
 }
 
 #editWebHookDialog {
@@ -233,11 +237,15 @@ div.endpointPayloadHeaders table tr :first-child {
     margin-left: 2px;
 }
 
-#addTemplateItemDialog #buildSuccessful.buildState, 
-#addTemplateItemDialog #buildFailed.buildState, 
-#editTemplateItemDialog #buildSuccessful.buildState, 
-#editTemplateItemDialog #buildFailed.buildState { 
+#addTemplateItemDialog #buildSuccessful.buildState,
+#addTemplateItemDialog #buildFailed.buildState,
+#editTemplateItemDialog #buildSuccessful.buildState,
+#editTemplateItemDialog #buildFailed.buildState {
     margin-left: 0px;
+}
+
+#hookPane, #buildPane, #extrasPane, #templatePane {
+	min-height:38em;
 }
 
 #buildPane {
@@ -293,14 +301,14 @@ a.restore {
 div.extraAuthParametersWrapper {
 	padding: 2em;
 	padding-top: 0.5em;
-} 
+}
 
 table#webhookTemplateHeader {
 	margin-top:1em;
 }
 
 table#webhookTemplateHeader th {
-	text-alight:right;
+	text-align:right;
 }
 
 table#webhookTemplateHeader, table#webhookTemplateHeader tr, table#webhookTemplateHeader th, table#webhookTemplateHeader td {
@@ -335,13 +343,13 @@ table.templateTable tr.blankline, table.templateTable tr.blankline td {
 	border-right: none;
 	background: white;
 }
-	
+
 table.templateTable tr.templateHeading th {
 	text-align: left;
 	padding-left: 1.5em;
 	padding-top: 0.75em;
 	padding-bottom: 0.75em;
-	
+
 }
 
 table.templateTable tr td.templateTableBuildTitle {
@@ -386,7 +394,7 @@ ul.templateBuildStates li:last-child:after {
 }
 
 /*
-#editor { 
+#editor {
     margin: 0;
     position: absolute;
     top: 0;
@@ -396,7 +404,7 @@ ul.templateBuildStates li:last-child:after {
 }*/
 
 .editor {
-	width: 98%;
+	/*width: 98%;*/
 	height: 28em;
 	margin:0px;
 	border-top: none;
@@ -418,7 +426,7 @@ table.templateDialogFormTable {
 	width: 100%;
     min-width: 48em;
     margin-bottom: 6px;
-    table-layout: fixed;
+    /*table-layout: fixed;*/
 }
 
 table.templateDialogFormTable label {
@@ -477,7 +485,7 @@ div#templateEditor ul.etabs li {
 div#templateEditor ul.etabs li#branchOptionTab {
 	text-align: right;
 	font-weight: normal;
- 	border:none; 
+ 	border:none;
  	background:#fff;
 }
 
@@ -493,7 +501,7 @@ div#templateEditor ul.etabs li#branchOptionTab {
 
 #webhookPreviewBuildId,
 #webhookPreviewBuildEvent,
-#previewTemplateItemDialogProjectSelect, 
+#previewTemplateItemDialogProjectSelect,
 #previewTemplateItemDialogBuildSelect,
 #previewTemplateItemDialogBuildStateSelect {
 	text-align: left;
@@ -625,4 +633,130 @@ td.webHookRowItemFormat {
 span.testingLimitations {
 	float: right;
 	clear: right;
+}
+
+div.upload {
+	align-content: center;
+
+}
+
+div#fs-uploaded {
+	display: none;
+	min-height: 18em;
+}
+
+div#fs-uploaded table td {
+	padding: 0.25em;
+}
+
+input#importTemplateDialogSubmit {
+	visibility: hidden;
+}
+
+div#template-parse-error {
+	margin-top: 1em;
+	visibility: hidden;
+	font-weight:  bold;
+}
+
+div.fs-upload-target {
+	height: 18em;
+	align-content: center;
+	cursor: pointer;
+	background-color: #F9F9F9;
+	text-align: center;
+	padding-top: 2em;
+	border: #999 dashed 2px;
+  	border-radius:10px;
+  	box-shadow: 0px 0px 0px 1px #fff inset;
+}
+
+div.fs-upload-target:hover, div.fs-upload-dragover {
+	background-color: #F3F3F3;
+	border-color: #0096ff;
+}
+
+div.fs-upload-dragexit {
+	background-color: #F9F9F9;
+	border: #999 dashed 2px;
+}
+
+/*! formstone v1.4.10 [upload.css] 2018-08-03 | GPL-3.0 License | formstone.it */
+.fs-upload {
+	position: relative;
+	overflow: hidden
+}
+
+.fs-upload, .fs-upload *, .fs-upload :after, .fs-upload :before,
+	.fs-upload:after, .fs-upload:before {
+	-webkit-box-sizing: border-box;
+	box-sizing: border-box;
+	-webkit-transition: none;
+	transition: none;
+	-webkit-user-select: none !important;
+	-moz-user-select: none !important;
+	-ms-user-select: none !important;
+	user-select: none !important
+}
+
+.fs-upload-input {
+	position: absolute;
+	top: 0;
+	right: 0;
+	bottom: 0;
+	left: 0;
+	z-index: -1px;
+	opacity: 0;
+	pointer-events: none
+}
+
+.fs-upload-target {
+
+
+}
+
+.fs-upload-disabled .fs-upload-target, .no-touch .fs-upload-disabled:hover .fs-upload-target {
+	cursor: default;
+	cursor: not-allowed;
+}
+
+div#webHookSearchForm {
+       float:right;
+}
+
+table#webHookSearchTable {
+       border: none;
+}
+
+table#webHookSearchTable tr {
+       border: 1px solid #ccc;
+}
+
+table#webHookSearchTable tr.projectTitle th {
+       text-align: left;
+       padding:1em;
+       padding-left: 2px;
+       font-size: 1.25em;
+}
+
+table#webHookSearchTable tr.blankRow, table#webHookSearchTable tr.blankRow td, table#webHookSearchTable tr.projectTitle, table#webHookSearchTable tr.projectTitle th {
+       border-left: none;
+       border-right: none;
+       border-bottom: none;
+       border-top: none;
+}
+
+span.webhookCreate {
+	font-size: small;
+	font-weight: normal;
+	cursor: pointer;
+	float: right;
+}
+
+span.webhookEditProjectLink {
+	font-size: small;
+	font-weight: normal;
+	cursor: pointer;
+	float: right;
+	vertical-align: bottom;
 }

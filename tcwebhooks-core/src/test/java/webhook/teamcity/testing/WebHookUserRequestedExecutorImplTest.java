@@ -1,6 +1,7 @@
 package webhook.teamcity.testing;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
 import static org.mockito.Matchers.anyString;
 import static org.mockito.Matchers.eq;
 import static org.mockito.Mockito.mock;
@@ -25,8 +26,6 @@ import org.junit.Test;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 
-import com.google.gson.GsonBuilder;
-
 import jetbrains.buildServer.log.Loggers;
 import jetbrains.buildServer.messages.Status;
 import jetbrains.buildServer.parameters.ParametersProvider;
@@ -36,7 +35,6 @@ import jetbrains.buildServer.serverSide.SBuildServer;
 import jetbrains.buildServer.serverSide.SBuildType;
 import jetbrains.buildServer.serverSide.SProject;
 import jetbrains.buildServer.serverSide.SRunningBuild;
-import jetbrains.buildServer.serverSide.settings.ProjectSettingsManager;
 import webhook.WebHookExecutionStats;
 import webhook.WebHookTestServer;
 import webhook.WebHookTestServerTestBase;
@@ -61,13 +59,19 @@ import webhook.teamcity.history.WebHookHistoryItemFactory;
 import webhook.teamcity.history.WebHookHistoryRepository;
 import webhook.teamcity.payload.WebHookPayload;
 import webhook.teamcity.payload.WebHookPayloadManager;
+import webhook.teamcity.payload.WebHookPayloadTemplate;
 import webhook.teamcity.payload.WebHookTemplateManager;
 import webhook.teamcity.payload.WebHookTemplateResolver;
 import webhook.teamcity.payload.content.ExtraParametersMap;
 import webhook.teamcity.payload.format.WebHookPayloadJsonTemplate;
+import webhook.teamcity.payload.template.SlackComCompactXmlWebHookTemplate;
+import webhook.teamcity.payload.variableresolver.WebHookVariableResolverManager;
+import webhook.teamcity.payload.variableresolver.WebHookVariableResolverManagerImpl;
+import webhook.teamcity.payload.variableresolver.standard.WebHooksBeanUtilsVariableResolverFactory;
 import webhook.teamcity.settings.WebHookConfig;
 import webhook.teamcity.settings.WebHookMainSettings;
 import webhook.teamcity.settings.WebHookProjectSettings;
+import webhook.teamcity.settings.WebHookSettingsManager;
 import webhook.teamcity.settings.config.WebHookTemplateConfig.WebHookTemplateBranchText;
 import webhook.teamcity.settings.config.WebHookTemplateConfig.WebHookTemplateText;
 import webhook.teamcity.settings.entity.WebHookTemplateEntity;
@@ -83,15 +87,18 @@ public class WebHookUserRequestedExecutorImplTest extends WebHookTestServerTestB
 	
 	
 	private SBuildServer server = mock(SBuildServer.class);
-	private ProjectSettingsManager projectSettingsManager = mock(ProjectSettingsManager.class);
+	private WebHookSettingsManager projectSettingsManager = mock(WebHookSettingsManager.class);
 	
 	private WebHookPayloadManager webHookPayloadManager = new WebHookPayloadManager(server);
-	private WebHookConfigFactory webHookConfigFactory = new WebHookConfigFactoryImpl(server, projectSettingsManager, webHookPayloadManager);
 	private WebHookTemplateJaxTestHelper webHookTemplateJaxTestHelper = new WebHookTemplateJaxTestHelper();
 	private WebHookTemplateManager webHookTemplateManager  = new WebHookTemplateManager(webHookPayloadManager, webHookTemplateJaxTestHelper);
-	private WebHookTemplateResolver webHookTemplateResolver = new WebHookTemplateResolver(webHookTemplateManager);
+	private WebHookTemplateResolver webHookTemplateResolver = new WebHookTemplateResolver(webHookTemplateManager, webHookPayloadManager);
+	private WebHookConfigFactory webHookConfigFactory = new WebHookConfigFactoryImpl(server, projectSettingsManager, webHookTemplateManager);
 	
-	private WebHookPayload jsonTemplate = new WebHookPayloadJsonTemplate(webHookPayloadManager);
+	private WebHookVariableResolverManager variableResolverManager = new WebHookVariableResolverManagerImpl();
+	
+	
+	private WebHookPayload jsonTemplate = new WebHookPayloadJsonTemplate(webHookPayloadManager, variableResolverManager);
 
 	private WebHookMainSettings mainSettings = new WebHookMainSettings(server);
 	private WebHookProjectSettings webHookProjectSettings;
@@ -102,7 +109,7 @@ public class WebHookUserRequestedExecutorImplTest extends WebHookTestServerTestB
 	private WebHookAuthenticatorProvider webHookAuthenticatorProvider = new WebHookAuthenticatorProvider();
 
 	private WebHookFactory webHookFactory = new WebHookFactoryImpl(mainSettings, webHookAuthenticatorProvider, webHookHttpClientFactory);
-	private WebHookContentBuilder webHookContentBuilder = new WebHookContentBuilder(webHookPayloadManager, webHookTemplateResolver);
+	private WebHookContentBuilder webHookContentBuilder = new WebHookContentBuilder(server, webHookTemplateResolver, variableResolverManager);
 	
 	private MockSBuildType buildType = new MockSBuildType("name", "description", "buildTypeId");
 	private SProject sproject = new MockSProject("My Project", "description", "project01", "MyProject", buildType);
@@ -128,6 +135,7 @@ public class WebHookUserRequestedExecutorImplTest extends WebHookTestServerTestB
 	@Before
 	public void setup() throws JAXBException, IOException, JDOMException {
 		MockitoAnnotations.initMocks(this);
+		variableResolverManager.registerVariableResolverFactory(new WebHooksBeanUtilsVariableResolverFactory());
 		jsonTemplate.register();
 		buildType.setProject(sproject);
 		when(server.findBuildInstanceById(1)).thenReturn(runningBuild);
@@ -140,12 +148,15 @@ public class WebHookUserRequestedExecutorImplTest extends WebHookTestServerTestB
 		UsernamePasswordAuthenticatorFactory usernamePasswordAuthenticatorFactory = new UsernamePasswordAuthenticatorFactory(webHookAuthenticatorProvider);
 		usernamePasswordAuthenticatorFactory.register();
 		
+		
 		framework = WebHookMockingFrameworkImpl.create(BuildStateEnum.BUILD_FINISHED, new ExtraParametersMap(new HashMap<String,String>()), new ExtraParametersMap(new HashMap<String,String>()));
 		framework.loadWebHookProjectSettingsFromConfigXml(new File("src/test/resources/project-settings-test-slackcompact-jsonTemplate-AllEnabled.xml"));
 		webHookProjectSettings = framework.getWebHookProjectSettings(); 
 
-		when(projectSettingsManager.getSettings(anyString(), anyString())).thenReturn(webHookProjectSettings);
+		when(projectSettingsManager.getSettings(anyString())).thenReturn(webHookProjectSettings);
 		when(parametersProvider.getAll()).thenReturn(new TreeMap<String,String>());
+		
+		buildType.setParametersProvider(parametersProvider);
 		
 		WebHookTemplateEntity templateEntity = webHookTemplateJaxTestHelper.readTemplate("src/main/resources/webhook/teamcity/payload/template/SlackComCompactWebHookTemplate.xml");
 		webHookTemplateManager.registerTemplateFormatFromXmlEntity(templateEntity);
@@ -159,11 +170,12 @@ public class WebHookUserRequestedExecutorImplTest extends WebHookTestServerTestB
 				webHookConfigFactory, 
 				webHookFactory,
 				webHookTemplateResolver, 
-				webHookPayloadManager, 
+				webHookPayloadManager,
 				webHookHistoryItemFactory,
 				webHookHistoryRepository,
 				webAddressTransformer,
-				webHookContentBuilder
+				webHookContentBuilder, 
+				variableResolverManager
 			);
 		
 		WebHookExecutionRequest webHookExecutionRequest = WebHookExecutionRequest.builder()
@@ -174,7 +186,6 @@ public class WebHookUserRequestedExecutorImplTest extends WebHookTestServerTestB
 				
 				.url("http://localhost:12345/webhook")
 				.templateId("slack.com-compact")
-				.payloadFormat("jsonTemplate")
 				.authEnabled(false)
 				.configBuildStates(finishedBuildState)
 				.build();
@@ -199,7 +210,8 @@ public class WebHookUserRequestedExecutorImplTest extends WebHookTestServerTestB
 				webHookHistoryItemFactory,
 				webHookHistoryRepository,
 				webAddressTransformer,
-				null
+				null, 
+				variableResolverManager
 			);
 		
 		BuildState finishedBuildState = new BuildState();
@@ -234,7 +246,7 @@ public class WebHookUserRequestedExecutorImplTest extends WebHookTestServerTestB
 				webHookHistoryItemFactory,
 				webHookHistoryRepository,
 				webAddressTransformer,
-				webHookContentBuilder
+				webHookContentBuilder, variableResolverManager
 			);
 		
 		WebHookExecutionRequest webHookExecutionRequest = WebHookExecutionRequest.builder()
@@ -245,13 +257,12 @@ public class WebHookUserRequestedExecutorImplTest extends WebHookTestServerTestB
 				
 				.url("http://localhost:12345/webhook")
 				.templateId("slack.com-compact")
-				.payloadFormat("jsonTemplate")
 				.authEnabled(false)
 				.configBuildStates(finishedBuildState)
 				.build();
 		WebHookHistoryItem historyItem = executorImpl.requestWebHookExecution(webHookExecutionRequest);
 		
-		assertEquals("HttpClient should be invoked exactly once", 1, httpClient.getIncovationCount());
+		assertEquals("HttpClient should be invoked exactly once", 1, httpClient.getInvocationCount());
 		assertEquals("Expect 801 since there is no server running on port 12345", 801, historyItem.getWebhookErrorStatus().getErrorCode());
 		assertEquals(true, historyItem.getWebhookErrorStatus().getMessage().contains("Connection refused"));
 	}
@@ -267,7 +278,8 @@ public class WebHookUserRequestedExecutorImplTest extends WebHookTestServerTestB
 				webHookHistoryItemFactory,
 				webHookHistoryRepository,
 				webAddressTransformer,
-				webHookContentBuilder
+				webHookContentBuilder, 
+				variableResolverManager
 				);
 		
 		WebHookExecutionRequest webHookExecutionRequest = WebHookExecutionRequest.builder()
@@ -278,7 +290,6 @@ public class WebHookUserRequestedExecutorImplTest extends WebHookTestServerTestB
 				
 				.url("http://localhost:58001/200")
 				.templateId("slack.com-compact")
-				.payloadFormat("jsonTemplate")
 				.authEnabled(false)
 				.configBuildStates(finishedBuildState)
 				.build();
@@ -288,7 +299,49 @@ public class WebHookUserRequestedExecutorImplTest extends WebHookTestServerTestB
 		WebHookHistoryItem historyItem = executorImpl.requestWebHookExecution(webHookExecutionRequest);
 
 		assertEquals("Post should have returned 200 OK", HttpServletResponse.SC_OK, s.getReponseCode());
-		assertEquals("HttpClient should be invoked exactly once", 1, httpClient.getIncovationCount());
+		assertEquals("HttpClient should be invoked exactly once", 1, httpClient.getInvocationCount());
+		assertEquals(false, historyItem.getWebHookExecutionStats().isErrored());
+		
+		stopWebServer(s);
+	}
+	
+	@Test
+	public void testRequestWebHookExecutionWebHookExecutionRequestForAddedToQueue() throws InterruptedException {
+		WebHookUserRequestedExecutor executorImpl = new WebHookUserRequestedExecutorImpl(
+				server, mainSettings,
+				webHookConfigFactory, 
+				webHookFactory,
+				webHookTemplateResolver, 
+				webHookPayloadManager, 
+				webHookHistoryItemFactory,
+				webHookHistoryRepository,
+				webAddressTransformer,
+				webHookContentBuilder, 
+				variableResolverManager
+				);
+		
+		WebHookPayloadTemplate slackCompact = new SlackComCompactXmlWebHookTemplate(webHookTemplateManager, webHookPayloadManager, webHookTemplateJaxTestHelper);
+		slackCompact.register();
+		
+		WebHookExecutionRequest webHookExecutionRequest = WebHookExecutionRequest.builder()
+				.buildId(1L)
+				.uniqueKey("new")
+				.projectExternalId("MyProject")
+				.testBuildState(BuildStateEnum.BUILD_ADDED_TO_QUEUE)
+				
+				.url("http://localhost:58001/200")
+				.templateId("slack.com-compact")
+				.authEnabled(false)
+				.configBuildStates(finishedBuildState)
+				.build();
+		
+		WebHookTestServer s = startWebServer();
+		
+		WebHookHistoryItem historyItem = executorImpl.requestWebHookExecution(webHookExecutionRequest);
+		
+		assertTrue(s.getRequestBody().contains("Been Added To The Build Queue"));
+		assertEquals("HttpClient should be invoked exactly once", 1, httpClient.getInvocationCount());
+		assertEquals("Post should have returned 200 OK", HttpServletResponse.SC_OK, s.getReponseCode());
 		assertEquals(false, historyItem.getWebHookExecutionStats().isErrored());
 		
 		stopWebServer(s);
@@ -305,7 +358,7 @@ public class WebHookUserRequestedExecutorImplTest extends WebHookTestServerTestB
 				webHookHistoryItemFactory,
 				webHookHistoryRepository,
 				webAddressTransformer,
-				webHookContentBuilder
+				webHookContentBuilder, variableResolverManager
 				);
 		
 		WebHookConfig loadedConfig = webHookProjectSettings.getWebHooksConfigs().get(0);
@@ -318,7 +371,6 @@ public class WebHookUserRequestedExecutorImplTest extends WebHookTestServerTestB
 				
 				.url("http://localhost:58001/200")
 				.templateId("slack.com-compact")
-				.payloadFormat("jsonTemplate")
 				.authEnabled(false)
 				.configBuildStates(finishedBuildState)
 				.build();
@@ -328,7 +380,7 @@ public class WebHookUserRequestedExecutorImplTest extends WebHookTestServerTestB
 		WebHookHistoryItem historyItem = executorImpl.requestWebHookExecution(webHookExecutionRequest);
 		
 		assertEquals("Post should have returned 200 OK", HttpServletResponse.SC_OK, s.getReponseCode());
-		assertEquals("HttpClient should be invoked exactly once", 1, httpClient.getIncovationCount());
+		assertEquals("HttpClient should be invoked exactly once", 1, httpClient.getInvocationCount());
 		assertEquals(false, historyItem.getWebHookExecutionStats().isErrored());
 		
 		stopWebServer(s);
@@ -346,7 +398,8 @@ public class WebHookUserRequestedExecutorImplTest extends WebHookTestServerTestB
 				webHookHistoryItemFactory,
 				webHookHistoryRepository,
 				webAddressTransformer,
-				webHookContentBuilder
+				webHookContentBuilder, 
+				variableResolverManager
 				);
 		
 		WebHookExecutionRequest webHookExecutionRequest = WebHookExecutionRequest.builder()
@@ -357,7 +410,6 @@ public class WebHookUserRequestedExecutorImplTest extends WebHookTestServerTestB
 				
 				.url("http://localhost:58001/auth/200")
 				.templateId("slack.com-compact")
-				.payloadFormat("jsonTemplate")
 				.authEnabled(true)
 				.authType("userpass")
 				.authParameters(new HashMap<String,String>() {
@@ -375,7 +427,7 @@ public class WebHookUserRequestedExecutorImplTest extends WebHookTestServerTestB
 		WebHookHistoryItem historyItem = executorImpl.requestWebHookExecution(webHookExecutionRequest);
 		
 		assertEquals("Post should have returned 200 OK", HttpServletResponse.SC_OK, s.getReponseCode());
-		assertEquals("HttpClient should be invoked exactly once", 1, httpClient.getIncovationCount());
+		assertEquals("HttpClient should be invoked exactly once", 1, httpClient.getInvocationCount());
 		assertEquals(false, historyItem.getWebHookExecutionStats().isErrored());
 		
 		stopWebServer(s);
@@ -392,7 +444,8 @@ public class WebHookUserRequestedExecutorImplTest extends WebHookTestServerTestB
 				webHookHistoryItemFactory,
 				webHookHistoryRepository,
 				webAddressTransformer,
-				null
+				null, 
+				variableResolverManager
 			);
 		
 		BuildState finishedBuildState = new BuildState();
@@ -411,11 +464,54 @@ public class WebHookUserRequestedExecutorImplTest extends WebHookTestServerTestB
 				.build();
 		WebHookHistoryItem historyItem = executorImpl.requestWebHookExecution(webHookTemplateExecutionRequest);
 		
-		assertEquals("HttpClient should be invoked exactly once", 1, httpClient.getIncovationCount());
+		assertEquals("HttpClient should be invoked exactly once", 1, httpClient.getInvocationCount());
 		assertEquals("Expect 801 since there is no server running on port 12345", 801, historyItem.getWebhookErrorStatus().getErrorCode());
 		Loggers.SERVER.debug("################# " + historyItem.getWebhookErrorStatus().getMessage());
 		assertEquals(true, historyItem.getWebhookErrorStatus().getMessage().contains("Connection refused"));
 
+	}
+	
+	@Test
+	public void testRequestWebHookExecutionWebHookTemplateExecutionRequestForAddedToQueue() throws InterruptedException {
+		WebHookUserRequestedExecutor executorImpl = new WebHookUserRequestedExecutorImpl(
+				server, mainSettings,
+				webHookConfigFactory, 
+				webHookFactory,
+				webHookTemplateResolver, 
+				webHookPayloadManager, 
+				webHookHistoryItemFactory,
+				webHookHistoryRepository,
+				webAddressTransformer,
+				null, 
+				variableResolverManager
+				);
+		
+		BuildState addedToQueueBuildState = new BuildState();
+		addedToQueueBuildState.setEnabled(BuildStateEnum.BUILD_ADDED_TO_QUEUE, true);
+		WebHookConfig loadedConfig = webHookProjectSettings.getWebHooksConfigs().get(0);
+		
+		WebHookTemplateExecutionRequest webHookTemplateExecutionRequest = WebHookTemplateExecutionRequest.builder()
+				.buildId(2L)
+				.projectExternalId(sproject.getExternalId())
+				.testBuildState(BuildStateEnum.BUILD_ADDED_TO_QUEUE)
+				.uniqueKey(loadedConfig.getUniqueKey())
+				.format("jsontemplate")
+				.url("http://localhost:58001/200")
+				.defaultBranchTemplate(new WebHookTemplateBranchText("branch Text for build: ${buildTypeId}"))
+				.defaultTemplate(new WebHookTemplateText(false, "non-Branch text for build: ${buildTypeId}"))
+				.build();
+		
+		WebHookTestServer s = startWebServer();
+		
+		WebHookHistoryItem historyItem = executorImpl.requestWebHookExecution(webHookTemplateExecutionRequest);
+		
+		assertEquals("non-Branch text for build: name", s.getRequestBody());
+		assertEquals("HttpClient should be invoked exactly once", 1, httpClient.getInvocationCount());
+		assertEquals("Post should have returned 200 OK", HttpServletResponse.SC_OK, s.getReponseCode());
+		assertEquals(false, historyItem.getWebHookExecutionStats().isErrored());
+		
+		stopWebServer(s);
+		
 	}
 	
 	@Test
@@ -429,7 +525,8 @@ public class WebHookUserRequestedExecutorImplTest extends WebHookTestServerTestB
 				webHookHistoryItemFactory,
 				webHookHistoryRepository,
 				webAddressTransformer,
-				webHookContentBuilder
+				webHookContentBuilder, 
+				variableResolverManager
 				);
 		
 		BuildState finishedBuildState = new BuildState();
@@ -451,8 +548,9 @@ public class WebHookUserRequestedExecutorImplTest extends WebHookTestServerTestB
 		
 		WebHookHistoryItem historyItem = executorImpl.requestWebHookExecution(webHookTemplateExecutionRequest);
 
+		assertEquals("branch Text for build: 123456", s.getRequestBody());
 		assertEquals("Post should have returned 200 OK", HttpServletResponse.SC_OK, s.getReponseCode());
-		assertEquals("HttpClient should be invoked exactly once", 1, httpClient.getIncovationCount());
+		assertEquals("HttpClient should be invoked exactly once", 1, httpClient.getInvocationCount());
 		assertEquals(false, historyItem.getWebHookExecutionStats().isErrored());
 		
 		stopWebServer(s);
@@ -470,7 +568,8 @@ public class WebHookUserRequestedExecutorImplTest extends WebHookTestServerTestB
 				webHookHistoryItemFactory,
 				webHookHistoryRepository,
 				webAddressTransformer,
-				null
+				null, 
+				variableResolverManager
 				);
 		
 		BuildState finishedBuildState = new BuildState();
@@ -531,7 +630,46 @@ public class WebHookUserRequestedExecutorImplTest extends WebHookTestServerTestB
 
 		@Override
 		public WebHookHistoryItem getWebHookHistoryTestItem(WebHookConfig whc,
-				WebHookExecutionStats webHookExecutionStats, SBuild sBuild, WebHookErrorStatus errorStatus) {
+				WebHookExecutionStats webHookExecutionStats, 
+				SBuild sBuild, WebHookErrorStatus errorStatus) {
+			try {
+				return new WebHookHistoryItem(
+						"prodjectId", sProject.getName(), 
+						"buildTypeId", 
+						"buildTypeName", "buildTypeExternalId", 1L, whc, 
+						webHookExecutionStats, 
+						errorStatus, new LocalDateTime(), 
+						webAddressTransformer.getGeneralisedHostName(new URL(whc.getUrl())),
+						true);
+			} catch (MalformedURLException e) {
+				e.printStackTrace();
+				return null;
+			}
+		}
+
+		@Override
+		public WebHookHistoryItem getWebHookHistoryTestItem(WebHookConfig whc, 
+				WebHookExecutionStats webHookExecutionStats,
+				SBuildType buildType, WebHookErrorStatus errorStatus) {
+			try {
+				return new WebHookHistoryItem(
+						"prodjectId", sProject.getName(), 
+						"buildTypeId", 
+						"buildTypeName", "buildTypeExternalId", 1L, whc, 
+						webHookExecutionStats, 
+						errorStatus, new LocalDateTime(), 
+						webAddressTransformer.getGeneralisedHostName(new URL(whc.getUrl())),
+						true);
+			} catch (MalformedURLException e) {
+				e.printStackTrace();
+				return null;
+			}
+		}
+
+		@Override
+		public WebHookHistoryItem getWebHookHistoryTestItem(WebHookConfig whc, 
+				WebHookExecutionStats webHookExecutionStats,
+				SProject sProject, WebHookErrorStatus errorStatus) {
 			try {
 				return new WebHookHistoryItem(
 						"prodjectId", sProject.getName(), 

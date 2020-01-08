@@ -17,8 +17,10 @@ import webhook.teamcity.payload.WebHookPayloadManager;
 import webhook.teamcity.payload.WebHookTemplateManager;
 import webhook.teamcity.payload.WebHookTemplateResolver;
 import webhook.teamcity.payload.content.WebHookPayloadContent;
+import webhook.teamcity.payload.variableresolver.WebHookVariableResolverManager;
 import webhook.teamcity.settings.WebHookConfig;
 import webhook.teamcity.settings.WebHookProjectSettings;
+import webhook.teamcity.settings.WebHookSettingsManager;
 
 public interface WebHookMockingFramework {
 	
@@ -30,9 +32,11 @@ public interface WebHookMockingFramework {
 	public WebHookPayloadContent getWebHookContent();
 	public WebHookPayloadManager getWebHookPayloadManager();
 	public WebHookProjectSettings getWebHookProjectSettings();
+	public WebHookSettingsManager getWebHookSettingsManager();
 	public WebHookTemplateManager getWebHookTemplateManager();
 	public WebHookTemplateResolver getWebHookTemplateResolver();
 	public WebHookAuthenticatorProvider getWebHookAuthenticatorProvider();
+	public WebHookVariableResolverManager getWebHookVariableResolverManager();
 	public WebHookListener getWebHookListener();
 	public void loadWebHookConfigXml(File xmlConfigFile) throws JDOMException, IOException;
 	public void loadNthWebHookConfigXml(int itemNumber, File xmlConfigFile) throws JDOMException, IOException;

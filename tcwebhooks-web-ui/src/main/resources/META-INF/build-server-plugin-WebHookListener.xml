@@ -6,12 +6,33 @@
 	<bean id="webHookListener" 
 		class="webhook.teamcity.WebHookListener" 
   		init-method="register" 
-  		/>
+  		>
+        <constructor-arg ref="webHookExecutor"/>
+  	</bean>
   		
 	<!-- bean id="testListener" 
 		class="webhook.teamcity.TestListener" 
   		init-method="register" 
   		/-->
+  		
+	<bean id="webHookExecutor"
+        class="webhook.teamcity.executor.WebHookExecutorManager">
+        <constructor-arg ref="webHookMainSettings"/>
+        <constructor-arg ref="webHookSerialExecutor"/>
+        <constructor-arg ref="webHookThreadingExecutor"/>
+    </bean>
+  		
+	<bean id="webHookSerialExecutor"
+        class="webhook.teamcity.executor.WebHookSerialExecutorImpl"
+        />
+  		
+	<bean id="webHookThreadingExecutor"
+        class="webhook.teamcity.executor.WebHookThreadingExecutorImpl"
+        />
+  		
+	<bean id="webHookRunnerFactory"
+        class="webhook.teamcity.executor.WebHookRunnerFactory"
+        />
   
 	<bean id="webHookHistoryRepository"
         class="webhook.teamcity.history.WebHookHistoryRepositoryImpl"
@@ -40,6 +61,10 @@
     <bean id="webHookIndexPageController" 
      	class="webhook.teamcity.extension.WebHookIndexPageController" 
      	init-method="register" 
+     	/>
+ 
+    <bean id="webHookSearchController"
+     	class="webhook.teamcity.extension.WebHookSearchController" 
      	/>
      	
     <bean id="webHookTemplateListPageController" 
@@ -75,6 +100,11 @@
      	class="webhook.teamcity.extension.WebHookTemplateEditPageController" 
      	init-method="register" 
      	/>
+     	
+    <bean id="webHookTemplateDiffPageController" 
+     	class="webhook.teamcity.extension.WebHookTemplateDiffPageController" 
+     	init-method="register" 
+     	/>
 
      <bean id="webHookAjaxSettingsListPageController" 
      	class="webhook.teamcity.extension.WebHookAjaxSettingsListPageController" 
@@ -103,6 +133,10 @@
      	class="webhook.teamcity.WebHookFactoryImpl" 
      	/>
      			
+     <bean id="webHookSettingsManager" 
+     	class="webhook.teamcity.settings.WebHookSettingsManagerImpl" 
+     	/>
+     	
      <bean id="webHookProjectSettings" 
      	class="webhook.teamcity.settings.WebHookProjectSettings" 
      	/>
@@ -182,7 +216,47 @@
 		class="webhook.teamcity.payload.format.WebHookPayloadJsonTemplate"
 		init-method="register">
 		<property name="rank">
-			<value>50</value>
+			<value>100</value>
+		</property>
+	</bean>
+	
+	<bean id="webHookPayloadJsonVelocityTemplate"
+		class="webhook.teamcity.payload.format.WebHookPayloadJsonVelocityTemplate"
+		init-method="register">
+		<property name="rank">
+			<value>110</value>
+		</property>
+	</bean>
+	
+	<bean id="webHookPayloadNameValuePairsTemplate"
+		class="webhook.teamcity.payload.format.WebHookPayloadNameValuePairsTemplate"
+		init-method="register">
+		<property name="rank">
+			<value>200</value>
+		</property>
+	</bean>
+	
+	<bean id="webHookPayloadNameValuePairsVelocityTemplate"
+		class="webhook.teamcity.payload.format.WebHookPayloadNameValuePairsVelocityTemplate"
+		init-method="register">
+		<property name="rank">
+			<value>210</value>
+		</property>
+	</bean>
+	
+	<bean id="webHookPayloadXmlTemplate"
+		class="webhook.teamcity.payload.format.WebHookPayloadXmlTemplate"
+		init-method="register">
+		<property name="rank">
+			<value>220</value>
+		</property>
+	</bean>
+	
+	<bean id="webHookPayloadXmlVelocityTemplate"
+		class="webhook.teamcity.payload.format.WebHookPayloadXmlVelocityTemplate"
+		init-method="register">
+		<property name="rank">
+			<value>230</value>
 		</property>
 	</bean>
 
@@ -207,12 +281,66 @@
 		class="webhook.teamcity.testing.WebHookConfigFactoryImpl"
 		/>
 		
+	<bean id="webHookVariableResolverManager"		
+		class="webhook.teamcity.payload.variableresolver.WebHookVariableResolverManagerImpl"
+		/>
+		
+	<bean id="webHooksBeanUtilsVariableResolverFactory"
+		class="webhook.teamcity.payload.variableresolver.standard.WebHooksBeanUtilsVariableResolverFactory"
+		init-method="register">
+		<property name="webHookVariableResolverManager" ref="webHookVariableResolverManager"/>
+	</bean>
+
+	<bean id="webHooksBeanUtilsLegacyVariableResolverFactory"
+		class="webhook.teamcity.payload.variableresolver.standard.WebHooksBeanUtilsLegacyVariableResolverFactory"
+		init-method="register">
+		<property name="webHookVariableResolverManager" ref="webHookVariableResolverManager"/>
+	</bean>
+	
+	<bean id="webHooksBeanUtilsVelocityVariableResolverFactory"
+		class="webhook.teamcity.payload.variableresolver.velocity.WebHooksBeanUtilsVelocityVariableResolverFactory"
+		init-method="register">
+		<property name="webHookVariableResolverManager" ref="webHookVariableResolverManager"/>
+	</bean>
+		
 	<bean id="webHookUserRequestedExecutor"
 		class="webhook.teamcity.testing.WebHookUserRequestedExecutorImpl"
 		/>
 
-	<bean id="legacyDepricatedFormatWebHookTemplate"
-		class="webhook.teamcity.payload.template.LegacyDeprecatedFormatWebHookTemplate"
+	<bean id="legacyEmptyWebHookTemplate"
+		class="webhook.teamcity.payload.template.LegacyEmptyWebHookTemplate"
+		init-method="register">
+		<property name="rank">
+			<value>500</value>
+		</property>
+	</bean>
+
+	<bean id="legacyJsonWebHookTemplate"
+		class="webhook.teamcity.payload.template.LegacyJsonWebHookTemplate"
+		init-method="register">
+		<property name="rank">
+			<value>500</value>
+		</property>
+	</bean>
+
+	<bean id="legacyNameValuePairsWebHookTemplate"
+		class="webhook.teamcity.payload.template.LegacyNameValuePairsWebHookTemplate"
+		init-method="register">
+		<property name="rank">
+			<value>500</value>
+		</property>
+	</bean>
+
+	<bean id="legacyTailoredJsonWebHookTemplate"
+		class="webhook.teamcity.payload.template.LegacyTailoredJsonWebHookTemplate"
+		init-method="register">
+		<property name="rank">
+			<value>500</value>
+		</property>
+	</bean>
+
+	<bean id="legacyXmlWebHookTemplate"
+		class="webhook.teamcity.payload.template.LegacyXmlWebHookTemplate"
 		init-method="register">
 		<property name="rank">
 			<value>500</value>
@@ -221,6 +349,14 @@
 	
 	<bean id="elasticSearchXmlWebHookTemplate"
 		class="webhook.teamcity.payload.template.ElasticSearchXmlWebHookTemplate"
+		init-method="register">
+		<property name="rank">
+			<value>100</value>
+		</property>
+	</bean>
+	
+	<bean id="discordComXmlWebHookTemplate"
+		class="webhook.teamcity.payload.template.DiscordComXmlWebHookTemplate"
 		init-method="register">
 		<property name="rank">
 			<value>100</value>

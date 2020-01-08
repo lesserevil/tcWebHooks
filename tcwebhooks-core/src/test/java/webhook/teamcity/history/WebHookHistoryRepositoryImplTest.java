@@ -24,7 +24,8 @@ import webhook.WebHookProxyConfig;
 import webhook.teamcity.BuildState;
 import webhook.teamcity.BuildStateEnum;
 import webhook.teamcity.auth.WebHookAuthenticator;
-import webhook.teamcity.payload.util.TemplateMatcher.VariableResolver;
+import webhook.teamcity.payload.variableresolver.VariableResolver;
+import webhook.teamcity.payload.variableresolver.VariableResolverFactory;
 import webhook.teamcity.settings.WebHookConfig;
 import webhook.teamcity.settings.WebHookFilterConfig;
 import webhook.teamcity.settings.WebHookHeaderConfig;
@@ -150,8 +151,8 @@ public class WebHookHistoryRepositoryImplTest {
 		when(sBuild01.getBuildId()).thenReturn(01L);
 		when(sBuild02.getBuildId()).thenReturn(02L);
 		
-		whc1 = new WebHookConfig("project01", "MyProject", "http://url/1", true, new BuildState().setAllEnabled(), "testFormat", "jsonTemplate", true, true, null, null);
-		whc2 = new WebHookConfig("project01", "MyProject", "http://url/2", true, new BuildState().setAllEnabled(), "testFormat", "jsonTemplate", true, true, null, null);
+		whc1 = new WebHookConfig("project01", "MyProject", "http://url/1", true, new BuildState().setAllEnabled(), "testFormat", true, true, null, null);
+		whc2 = new WebHookConfig("project01", "MyProject", "http://url/2", true, new BuildState().setAllEnabled(), "testFormat", true, true, null, null);
 		
 		WebHookHistoryRepository historyRepository = new WebHookHistoryRepositoryImpl();
 		historyRepository.addHistoryItem(new WebHookHistoryItem(whc1, webhook01.getExecutionStats(), sBuild01, null));
@@ -416,11 +417,21 @@ public class WebHookHistoryRepositoryImplTest {
 		@Override
 		public void addHeaders(List<WebHookHeaderConfig> headers) {
 			notImplemented();
-			
 		}
 
 		@Override
 		public void resolveHeaders(VariableResolver variableResolver) {
+			notImplemented();
+		}
+
+		@Override
+		public VariableResolverFactory getVariableResolverFactory() {
+			notImplemented();
+			return null;
+		}
+
+		@Override
+		public void setVariableResolverFactory(VariableResolverFactory variableResolverFactory) {
 			notImplemented();
 		}
 		

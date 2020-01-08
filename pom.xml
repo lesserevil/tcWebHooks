@@ -4,14 +4,15 @@
 	<groupId>netwolfuk.teamcity.plugins.tcwebhooks</groupId>
 	<artifactId>tcwebhooks</artifactId>
 	<properties>
-    	<majorVersion>1.1</majorVersion>
-    	<minorVersion>snapshot</minorVersion>
+    	<majorVersion>1.2.0-alpha.3</majorVersion>
+    	<buildNumber>snapshot</buildNumber>
     	<gitHash>${GIT_HASH}</gitHash>
     	<gitBranch>${GIT_BRANCH}</gitBranch>    	
-    	<currentVersion>${majorVersion}.${minorVersion}</currentVersion>
+    	<currentVersion>${majorVersion}-build.${buildNumber}</currentVersion>
     	<!-- Set the TeamCity version, so that we reference these jars in Maven -->
     	<teamcityVersion>2018.1.2</teamcityVersion>
     	<springframework.version>4.3.18.RELEASE</springframework.version>
+		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     </properties>
 	<version>${currentVersion}</version>
 	<name>tcWebHooks - A WebHooks plugin for TeamCity</name>
@@ -68,17 +69,11 @@
 	    <id>jetbrains-all</id>
 	    <url>http://repository.jetbrains.com/all</url>
 	  </repository>
-    <repository>
-          <id>JetBrains</id>
-                <url>https://download.jetbrains.com/teamcity-repository</url>
-                    </repository>
-
+	    <repository>
+	        <id>JetBrains</id>
+	        <url>https://download.jetbrains.com/teamcity-repository/</url>
+	    </repository>
 	</repositories>
-	<dependencies>
-
-  		 
-	</dependencies>
-	
 
 	<developers>
 		<developer>
@@ -94,9 +89,8 @@
 	
 	<packaging>pom</packaging>
 	<modules>
+		<module>tcwebhooks-core</module>
 		<module>tcwebhooks-rest-api</module>
 		<module>tcwebhooks-web-ui</module>
-		
-		<module>tcwebhooks-core</module>
 	</modules>
 </project>

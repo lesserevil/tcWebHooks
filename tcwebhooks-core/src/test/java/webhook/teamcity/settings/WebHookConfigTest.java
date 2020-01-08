@@ -113,7 +113,7 @@ public class WebHookConfigTest {
 	public void testGetEnabledListAsString() {
 		assertTrue(webhookAllEnabled.getEnabledListAsString().equals("All Build Events"));
 		assertTrue(webhookAllDisabled.getEnabledListAsString().equals("None"));
-		assertEquals(webhookMostEnabled.getEnabledListAsString()," Build Started, Changes Loaded, Build Interrupted, Build Almost Completed, Build Failed, Build Successful");
+		assertEquals(" Build Added to Queue, Build Removed from Queue by User, Build Started, Changes Loaded, Build Interrupted, Build Almost Completed, Build Failed, Build Successful, Build Pinned, Build Unpinned", webhookMostEnabled.getEnabledListAsString());
 	}
 
 	@Test
@@ -180,19 +180,6 @@ public class WebHookConfigTest {
 	public void testGetStateBuildBrokenAsChecked() {
 		assertFalse(webhookAllEnabled.getStateBuildBrokenAsChecked().equals(CHECKED));
 		assertFalse(webhookAllDisabled.getStateBuildBrokenAsChecked().equals(CHECKED));
-	}
-
-	@Test
-	public void testGetPayloadFormat() {
-		assertTrue(webhookAllEnabled.getPayloadFormat().equals("nvpairs"));
-	}
-
-	@Test
-	public void testSetPayloadFormatString() {
-		assertTrue(webhookAllEnabled.getPayloadFormat().equals("nvpairs"));
-		webhookAllEnabled.setPayloadFormat("XML");
-		assertTrue(webhookAllEnabled.getPayloadFormat().equals("XML"));
-		assertFalse(webhookAllEnabled.getAuthEnabled());
 	}
 	
 	@Test

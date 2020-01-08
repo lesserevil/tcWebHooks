@@ -33,7 +33,19 @@ import jetbrains.buildServer.tests.TestInfo;
 import jetbrains.buildServer.users.SUser;
 import jetbrains.buildServer.users.User;
 import jetbrains.buildServer.users.UserSet;
-import jetbrains.buildServer.vcs.*;
+import jetbrains.buildServer.vcs.CheckoutRules;
+import jetbrains.buildServer.vcs.FilteredVcsChange;
+import jetbrains.buildServer.vcs.RelationType;
+import jetbrains.buildServer.vcs.SVcsModification;
+import jetbrains.buildServer.vcs.SVcsRoot;
+import jetbrains.buildServer.vcs.SelectPrevBuildPolicy;
+import jetbrains.buildServer.vcs.VcsException;
+import jetbrains.buildServer.vcs.VcsFileModification;
+import jetbrains.buildServer.vcs.VcsModification;
+import jetbrains.buildServer.vcs.VcsRootInstance;
+import jetbrains.buildServer.vcs.VcsRootInstanceEntry;
+import jetbrains.buildServer.vcs.VcsRootNotFoundException;
+import jetbrains.buildServer.vcs.VcsRootStatus;
 import jetbrains.vcs.api.VcsService;
 import org.jetbrains.annotations.NotNull;
 
@@ -359,6 +371,7 @@ public class MockSRunningBuild implements SRunningBuild {
 						// TODO Auto-generated method stub
 						return null;
 					}
+
 				};
 			}
 			
@@ -465,9 +478,9 @@ public class MockSRunningBuild implements SRunningBuild {
 				return null;
 			}
 
-			@Override
-			public void setDescription(@NotNull String s) throws AccessDeniedException {
-
+			//@Override
+			public void setDescription(String newDescription) throws AccessDeniedException {
+				// TODO Auto-generated method stub
 			}
 		});
 	}

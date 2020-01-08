@@ -15,7 +15,6 @@ import jetbrains.buildServer.controllers.BaseController;
 import jetbrains.buildServer.serverSide.SBuildServer;
 import jetbrains.buildServer.serverSide.SProject;
 import jetbrains.buildServer.serverSide.auth.Permission;
-import jetbrains.buildServer.serverSide.settings.ProjectSettingsManager;
 import jetbrains.buildServer.users.SUser;
 import jetbrains.buildServer.web.openapi.PluginDescriptor;
 import jetbrains.buildServer.web.openapi.WebControllerManager;
@@ -31,11 +30,11 @@ import webhook.teamcity.extension.bean.RegisteredWebhookAuthenticationTypesBean;
 import webhook.teamcity.extension.bean.TemplatesAndProjectWebHooksBean;
 import webhook.teamcity.extension.bean.template.RegisteredWebHookTemplateBean;
 import webhook.teamcity.extension.util.EnabledBuildStateResolver;
-import webhook.teamcity.extension.util.ProjectHistoryResolver;
 import webhook.teamcity.payload.WebHookPayloadManager;
 import webhook.teamcity.payload.WebHookTemplateResolver;
 import webhook.teamcity.settings.WebHookProjectSettings;
-import webhook.teamcity.settings.WebHookProjectSettings.WebHookUpdateResult;
+import webhook.teamcity.settings.WebHookUpdateResult;
+import webhook.teamcity.settings.WebHookSettingsManager;
 
 @SuppressWarnings("squid:MaximumInheritanceDepth")
 public class WebHookAjaxEditPageController extends BaseController {
@@ -43,22 +42,26 @@ public class WebHookAjaxEditPageController extends BaseController {
 	    private static final String PARAMS_MESSAGES_KEY = "messages";
 		protected static final String BEFORE_FINISHED = "BeforeFinished";
 		protected static final String BUILD_INTERRUPTED = "BuildInterrupted";
+		protected static final String BUILD_ADDED_TO_QUEUE = "BuildAddedToQueue";
+		protected static final String BUILD_REMOVED_FROM_QUEUE = "BuildRemovedFromQueue";
 		protected static final String BUILD_STARTED = "BuildStarted";
 		protected static final String CHANGES_LOADED = "ChangesLoaded";
 		protected static final String BUILD_BROKEN = "BuildBroken";
 		protected static final String BUILD_FIXED = "BuildFixed";
 		protected static final String BUILD_FAILED = "BuildFailed";
 		protected static final String BUILD_SUCCESSFUL = "BuildSuccessful";
+		protected static final String BUILD_PINNED = "BuildPinned";
+		protected static final String BUILD_UNPINNED = "BuildUnpinned";
 		
 		private final WebControllerManager myWebManager;
-	    private ProjectSettingsManager mySettings;
+	    private WebHookSettingsManager mySettings;
 	    private final String myPluginPath;
 	    private final WebHookPayloadManager myManager;
 		private final WebHookTemplateResolver myTemplateResolver;
 		private final WebHookAuthenticatorProvider myAuthenticatorProvider;
 	    
 	    public WebHookAjaxEditPageController(SBuildServer server, WebControllerManager webManager, 
-	    		ProjectSettingsManager settings, WebHookPayloadManager manager,
+	    		WebHookSettingsManager settings, WebHookPayloadManager manager,
 	    		WebHookTemplateResolver templateResolver, PluginDescriptor pluginDescriptor, WebHookAuthenticatorProvider authenticatorProvider) {
 	        super(server);
 	        myWebManager = webManager;
@@ -90,14 +93,14 @@ public class WebHookAjaxEditPageController extends BaseController {
 		        		params.put(PARAMS_MESSAGES_KEY, "<errors><error id=\"messageArea\">The webhook was not found. No matching project found</error></errors>");
 		        		noErrors = false;
 		        	} else {
-		        		WebHookProjectSettings projSettings = (WebHookProjectSettings) mySettings.getSettings(request.getParameter("projectId"), "webhooks");
+		        		WebHookProjectSettings projSettings = (WebHookProjectSettings) mySettings.getSettings(request.getParameter("projectId"));
 
 			    		if (noErrors && (projSettings != null) && (myProject != null)
 			    				&& (myUser.isPermissionGrantedForProject(myProject.getProjectId(), Permission.EDIT_PROJECT))){
 			    			if ((request.getParameter("submitAction") != null ) 
 			    				&& (request.getParameter("submitAction").equals("removeWebHook"))
 			    				&& (request.getParameter("removedWebHookId") != null)){
-			    					WebHookUpdateResult result = projSettings.deleteWebHook(request.getParameter("removedWebHookId"), myProject.getProjectId());
+			    					WebHookUpdateResult result = mySettings.deleteWebHook(request.getParameter("removedWebHookId"), myProject.getProjectId());
 			    					if(result.isUpdated()){
 			    						myProject.persist();
 	    	    						params.put(PARAMS_MESSAGES_KEY, "<errors /><webhook action='delete' id='" + result.getWebHookConfig().getUniqueKey() + "'/>");
@@ -110,8 +113,6 @@ public class WebHookAjaxEditPageController extends BaseController {
 				    				&& (request.getParameter("submitAction").equals("updateWebHook") || request.getParameter("submitAction").equals("addWebHook"))){
 			    				if((request.getParameter("URL") != null ) 
 				    				&& (request.getParameter("URL").length() > 0 )
-				    				&& (request.getParameter("payloadFormat") != null)
-				    				&& (request.getParameter("payloadFormat").length() > 0)
 				    				&& (request.getParameter("payloadTemplate") != null)
 				    				&& (request.getParameter("payloadTemplate").length() > 0))
 				    				{
@@ -135,12 +136,16 @@ public class WebHookAjaxEditPageController extends BaseController {
 			    						buildStateResolver.checkAndAddBuildState(request, states, BuildStateEnum.BUILD_FAILED, BUILD_FAILED);
 			    						buildStateResolver.checkAndAddBuildState(request, states, BuildStateEnum.BUILD_FIXED, BUILD_FIXED);
 			    						buildStateResolver.checkAndAddBuildState(request, states, BuildStateEnum.BUILD_BROKEN, BUILD_BROKEN);
+			    						buildStateResolver.checkAndAddBuildState(request, states, BuildStateEnum.BUILD_ADDED_TO_QUEUE, BUILD_ADDED_TO_QUEUE);
+			    						buildStateResolver.checkAndAddBuildState(request, states, BuildStateEnum.BUILD_REMOVED_FROM_QUEUE, BUILD_REMOVED_FROM_QUEUE);
 			    						buildStateResolver.checkAndAddBuildState(request, states, BuildStateEnum.BUILD_STARTED, BUILD_STARTED);
 			    						buildStateResolver.checkAndAddBuildState(request, states, BuildStateEnum.CHANGES_LOADED, CHANGES_LOADED);
 			    						buildStateResolver.checkAndAddBuildState(request, states, BuildStateEnum.BUILD_INTERRUPTED, BUILD_INTERRUPTED);	
 			    						buildStateResolver.checkAndAddBuildState(request, states, BuildStateEnum.BEFORE_BUILD_FINISHED, BEFORE_FINISHED);
 			    						buildStateResolver.checkAndAddBuildStateIfEitherSet(request, states, BuildStateEnum.BUILD_FINISHED, BUILD_SUCCESSFUL,BUILD_FAILED);
 			    						buildStateResolver.checkAndAddBuildState(request, states, BuildStateEnum.RESPONSIBILITY_CHANGED, "ResponsibilityChanged");
+			    						buildStateResolver.checkAndAddBuildState(request, states, BuildStateEnum.BUILD_PINNED, BUILD_PINNED);
+			    						buildStateResolver.checkAndAddBuildState(request, states, BuildStateEnum.BUILD_UNPINNED, BUILD_UNPINNED);
 			    						
 			    						if ((request.getParameter("buildTypeSubProjects") != null ) && (request.getParameter("buildTypeSubProjects").equalsIgnoreCase("on"))){
 			    							buildTypeSubProjects = true;
@@ -185,8 +190,8 @@ public class WebHookAjaxEditPageController extends BaseController {
 			    						}
 			    						
 			    						if (noErrors && request.getParameter("webHookId").equals("new")){
-			    							WebHookUpdateResult result = projSettings.addNewWebHook(myProject.getProjectId(), myProject.getExternalId(), request.getParameter("URL"), enabled, 
-			    														states,request.getParameter("payloadFormat"), request.getParameter("payloadTemplate"), 
+			    							WebHookUpdateResult result = mySettings.addNewWebHook(myProject.getProjectId(), myProject.getExternalId(), request.getParameter("URL"), enabled, 
+			    														states, request.getParameter("payloadTemplate"), 
 			    														buildTypeAll, buildTypeSubProjects, buildTypes, webHookAuthConfig);
 			    							if(result.isUpdated()){
 			    								myProject.persist();
@@ -195,9 +200,9 @@ public class WebHookAjaxEditPageController extends BaseController {
 			    								params.put("message", "<errors><error id=\"persistenceError\">Unable to perist webhook</error>");
 			    							}
 			    						} else if (noErrors) {
-			    							WebHookUpdateResult result = projSettings.updateWebHook(myProject.getProjectId(),request.getParameter("webHookId"), 
+			    							WebHookUpdateResult result = mySettings.updateWebHook(myProject.getProjectId(),request.getParameter("webHookId"), 
 			    														request.getParameter("URL"), enabled, 
-			    														states, request.getParameter("payloadFormat"), request.getParameter("payloadTemplate"), 
+			    														states, request.getParameter("payloadTemplate"), 
 			    														buildTypeAll, buildTypeSubProjects, buildTypes, webHookAuthConfig);
 			    							if(result.isUpdated()){
 			    								myProject.persist();
@@ -227,7 +232,7 @@ public class WebHookAjaxEditPageController extends BaseController {
 	    	}
 
 	    	params.put("formatList", RegisteredWebHookTemplateBean.build(myTemplateResolver.findWebHookTemplatesForProject(myProject),
-					myManager.getRegisteredFormats()).getTemplateList());
+					myManager.getRegisteredFormats(), mySettings).getTemplateList());
 	    	
 	        if (request.getMethod().equalsIgnoreCase("get")
 	        		&& request.getParameter("projectId") != null ){
@@ -235,7 +240,7 @@ public class WebHookAjaxEditPageController extends BaseController {
 	        	SProject project = TeamCityIdResolver.findProjectById(this.myServer.getProjectManager(), request.getParameter("projectId"));
 	        	if (project != null){
 	        	
-			    	WebHookProjectSettings projSettings = (WebHookProjectSettings) mySettings.getSettings(request.getParameter("projectId"), "webhooks");
+			    	WebHookProjectSettings projSettings = (WebHookProjectSettings) mySettings.getSettings(request.getParameter("projectId"));
 			    	
 			    	String message = projSettings.getWebHooksAsString();
 			    	
@@ -259,7 +264,8 @@ public class WebHookAjaxEditPageController extends BaseController {
 			    		params.put("projectWebHooksAsJson", ProjectWebHooksBeanGsonSerialiser.serialise(
 								TemplatesAndProjectWebHooksBean.build(
 										RegisteredWebHookTemplateBean.build(myTemplateResolver.findWebHookTemplatesForProject(project),
-																			myManager.getRegisteredFormats()), 
+																			myManager.getRegisteredFormats(),
+																			mySettings), 
 										ProjectWebHooksBean.build(projSettings, 
 																	project, 
 																	myManager.getRegisteredFormatsAsCollection(),

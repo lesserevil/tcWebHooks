@@ -338,11 +338,11 @@ public class MockSBuildAgent implements SBuildAgent, BuildAgent {
 		return null;
 	}
 
-	@NotNull
-	@Override
+	//@Override
 	public String getCommunicationProtocolType() {
+		// TODO Auto-generated method stub
 		return null;
 	}
-
+	
 
 }

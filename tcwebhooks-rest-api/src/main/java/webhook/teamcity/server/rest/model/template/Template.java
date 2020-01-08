@@ -14,9 +14,6 @@ import javax.xml.bind.annotation.XmlType;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
-import com.intellij.openapi.util.text.StringUtil;
-
-import jetbrains.buildServer.server.rest.errors.BadRequestException;
 import jetbrains.buildServer.server.rest.errors.NotFoundException;
 import jetbrains.buildServer.server.rest.model.Fields;
 import jetbrains.buildServer.server.rest.util.ValueWithDefault;
@@ -27,9 +24,7 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 import webhook.teamcity.BuildStateEnum;
 import webhook.teamcity.payload.WebHookTemplateManager;
-import webhook.teamcity.payload.template.WebHookTemplateFromXml;
 import webhook.teamcity.server.rest.WebHookWebLinks;
-import webhook.teamcity.server.rest.data.DataProvider;
 import webhook.teamcity.server.rest.data.TemplateFinder;
 import webhook.teamcity.server.rest.data.WebHookTemplateConfigWrapper;
 import webhook.teamcity.server.rest.data.WebHookTemplateItemConfigWrapper.WebHookTemplateItemRest;
@@ -46,6 +41,7 @@ import webhook.teamcity.settings.config.WebHookTemplateConfig.WebHookTemplateTex
 
 public class Template {
 	@XmlAttribute
+	@Getter
 	public String id;
 
 	@XmlAttribute
@@ -179,7 +175,7 @@ public class Template {
 			this.href = ValueWithDefault.decideDefault(fields.isIncluded("href"), String.valueOf(beanContext.getApiUrlBuilder().getTemplateDefaultItemHref(template.getTemplateConfig())));
 			this.templateText = ValueWithDefault.decideDefault(fields.isIncluded("templateText", false, true), new TemplateText(template.getTemplateConfig(), id, fields, beanContext));
 			this.branchTemplateText = ValueWithDefault.decideDefault(fields.isIncluded("branchTemplateText", false, true), new BranchTemplateText(template.getTemplateConfig(), id, fields, beanContext));
-			this.parentTemplate = ValueWithDefault.decideDefault(fields.isIncluded("parentTemplate", false, false), new TemplateItemParent(template.getTemplateConfig().getId(), template.getTemplateConfig().getTemplateDescription(), beanContext.getApiUrlBuilder().getHref(template.getTemplateConfig())));
+			this.parentTemplate = ValueWithDefault.decideDefault(fields.isIncluded("parentTemplate", false, false), new TemplateItemParent(template.getTemplateConfig().getId(), template.getTemplateConfig().getTemplateDescription(), template.getTemplateConfig().getFormat(), beanContext.getApiUrlBuilder().getHref(template.getTemplateConfig())));
 
 			if (fields.isIncluded("buildStates", false, true)) {
 				buildStates = new ArrayList<>();
@@ -210,7 +206,7 @@ public class Template {
 			this.href = ValueWithDefault.decideDefault(fields.isIncluded("href"), String.valueOf(beanContext.getApiUrlBuilder().getTemplateItemHref(template.getTemplateConfig(), templateItem)));
 			this.templateText = new TemplateText(template.getTemplateConfig(), templateItem, id, fields, beanContext);
 			this.branchTemplateText = new BranchTemplateText(template.getTemplateConfig(), templateItem, id, fields, beanContext);
-			this.parentTemplate = ValueWithDefault.decideDefault(fields.isIncluded("parentTemplate", false, false), new TemplateItemParent(template.getTemplateConfig().getId(), template.getTemplateConfig().getTemplateDescription(), beanContext.getApiUrlBuilder().getHref(template.getTemplateConfig())));
+			this.parentTemplate = ValueWithDefault.decideDefault(fields.isIncluded("parentTemplate", false, false), new TemplateItemParent(template.getTemplateConfig().getId(), template.getTemplateConfig().getTemplateDescription(), template.getTemplateConfig().getFormat(), beanContext.getApiUrlBuilder().getHref(template.getTemplateConfig())));
 			this.buildStates.clear();
 			for (BuildStateEnum state : BuildStateEnum.getNotifyStates()){
 				WebHookTemplateStateRest myState = new WebHookTemplateStateRest(state.getShortName(), 
@@ -242,13 +238,14 @@ public class Template {
 	}
 	
 	@XmlRootElement
-	@XmlType (name = "parentTemplate", propOrder = { "id", "description", "href" }) 
+	@XmlType (name = "parentTemplate", propOrder = { "id", "description", "format", "href" }) 
 	@Getter @Setter @XmlAccessorType(XmlAccessType.FIELD)
 	@NoArgsConstructor // empty constructor for JAXB
 	@AllArgsConstructor
 	public static class TemplateItemParent {
 		String id;
 		String description;
+		String format;
 		String href;
 	}
 	

@@ -13,16 +13,23 @@ import jetbrains.buildServer.web.openapi.PluginDescriptor;
 import jetbrains.buildServer.web.openapi.WebControllerManager;
 import webhook.teamcity.WebHookPluginDataResolver;
 import webhook.teamcity.extension.bean.template.EditTemplateRenderingBean;
+import webhook.teamcity.payload.WebHookPayloadManager;
 import webhook.teamcity.payload.WebHookTemplateManager;
+import webhook.teamcity.payload.WebHookTemplateManager.TemplateState;
+import webhook.teamcity.settings.WebHookSettingsManager;
 import webhook.teamcity.settings.config.WebHookTemplateConfig;
 
 @SuppressWarnings("squid:MaximumInheritanceDepth")
 public class WebHookTemplateEditPageController extends WebHookTemplateBasePageController {
 
+		private final WebHookPayloadManager myPayloadManager;
+	
 	    public WebHookTemplateEditPageController(SBuildServer server, WebControllerManager webManager, 
-	    		PluginDescriptor pluginDescriptor, WebHookPluginDataResolver webHookPluginDataResolver,
-	    		WebHookTemplateManager webHookTemplateManager) {
-	        super(server, webManager, pluginDescriptor, webHookPluginDataResolver, webHookTemplateManager);
+	    		PluginDescriptor pluginDescriptor, WebHookPayloadManager payloadManager, 
+	    		WebHookPluginDataResolver webHookPluginDataResolver, WebHookTemplateManager webHookTemplateManager,
+	    		WebHookSettingsManager webHookSettingsManager) {
+	        super(server, webManager, pluginDescriptor, webHookPluginDataResolver, webHookTemplateManager, webHookSettingsManager);
+	        this.myPayloadManager = payloadManager;
 	    }
 
 	    @Override
@@ -41,10 +48,12 @@ public class WebHookTemplateEditPageController extends WebHookTemplateBasePageCo
     			String templateName = request.getParameter(GET_VARIABLE_NAME_TEMPLATE);
     			if (templateName != null) {
     				
-    				WebHookTemplateConfig templateConfig = myTemplateManager.getTemplateConfig(templateName);
+    				WebHookTemplateConfig templateConfig = myTemplateManager.getTemplateConfig(templateName, TemplateState.BEST);
     				
     				if (templateConfig != null) {
-    					params.put("webhookTemplateBean", EditTemplateRenderingBean.build(templateConfig, myTemplateManager.getTemplateState(templateConfig.getId())));
+    					params.put("payloadFormats", myPayloadManager.getTemplatedFormats());
+    					params.put("webhookTemplateBean", EditTemplateRenderingBean.build(templateConfig, myTemplateManager.getTemplateState(templateConfig.getId(), TemplateState.BEST)));
+    					params.put("webHookCount", this.myWebHookSettingsManager.getTemplateUsageCount(templateConfig.getId()));
     					return new ModelAndView(myPluginDescriptor.getPluginResourcesPath() + "WebHook/templateEdit.jsp", params);
     				}
     			}
