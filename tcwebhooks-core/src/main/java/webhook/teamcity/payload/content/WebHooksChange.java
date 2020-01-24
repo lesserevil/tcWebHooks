@@ -9,6 +9,8 @@ import jetbrains.buildServer.vcs.SVcsModification;
 import jetbrains.buildServer.vcs.VcsFileModification;
 import jetbrains.buildServer.vcs.VcsRootInstance;
 
+import webhook.teamcity.Loggers;
+
 public class WebHooksChange {
 
 	private static @Nullable String tryGetVcsRootName(final SVcsModification modification) {
@@ -21,19 +23,18 @@ public class WebHooksChange {
 			vcsRoot = modification.getVcsRoot();
 			return vcsRoot.getName();
 		} catch(UnsupportedOperationException e) {
+			Loggers.SERVER.debug(e);
 			// Modifications tied to personal changes don't have a backing VCS root, and throw when trying
 			// to access getVcsRoot() (see issue #132)
 			return null;
 		} catch(Exception e) {
+			Loggers.SERVER.debug(e);
 			return null;
 		}
-
-		
 	}
 
-
-
 	public static WebHooksChange build(SVcsModification modification, boolean includeVcsFileModifications) {
+		Loggers.SERVER.warn(modification.toString());
 		WebHooksChange change = new WebHooksChange();
 		change.setComment(modification.getDescription());
 		change.setUsername(modification.getUserName());
