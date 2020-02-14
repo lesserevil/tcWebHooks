@@ -7,10 +7,6 @@
             "label": "verify",
             "type": "shell",
             "command": "mvn -B verify",
-            "group": {
-                "kind": "build",
-                "isDefault": true
-            }
         },
         {
             "label": "test",
@@ -22,7 +18,11 @@
             "label": "clean+package",
             "type": "shell",
             "command": "mvn -B clean package",
-            "group": "build"
+            "problemMatcher": [],
+            "group": {
+                "kind": "build",
+                "isDefault": true
+            }
         }
     ]
 }
