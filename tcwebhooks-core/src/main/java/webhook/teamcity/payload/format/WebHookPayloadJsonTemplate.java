@@ -83,8 +83,24 @@ public class WebHookPayloadJsonTemplate extends WebHookPayloadGeneric implements
 
 	@Override
 	public Object serialiseObject(Object object) {
-		if (object instanceof String || object instanceof Boolean || object instanceof Integer || object instanceof Long) {
+		if (object instanceof Boolean || object instanceof Integer || object instanceof Long) {
 			return object;
+		}
+		if (object instanceof String) {
+			String string = (String)object;
+						String escapes[][] = new String[][]{
+					{"\\", "\\\\"},
+					{"\"", "\\\""},
+					{"\n", "\\n"},
+					{"\r", "\\r"},
+					{"\b", "\\b"},
+					{"\f", "\\f"},
+					{"\t", "\\t"}
+			};
+			for (String[] esc : escapes) {
+				string = string.replace(esc[0], esc[1]);
+			}
+			return string;
 		}
 		return gson.toJson(object);
 	}
