@@ -9,43 +9,15 @@ import org.apache.velocity.runtime.parser.node.Node;
 
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
-import com.google.gson.TypeAdapter;
-import com.google.gson.stream.JsonReader;
-import com.google.gson.stream.JsonToken;
-import com.google.gson.stream.JsonWriter;
-
-import webhook.teamcity.Loggers;
 
 import webhook.teamcity.payload.convertor.SuperclassExclusionStrategy;
 
 public class VelocityToJsonDirective extends Directive {
 
-	public static final TypeAdapter<String> stringAdapter = new TypeAdapter<String>() {
-		@Override
-		public String read(JsonReader in) throws IOException {
-			JsonToken peek = in.peek();
-			if (peek == JsonToken.NULL) {
-				in.nextNull();
-				return null;
-			}
-			/* coerce booleans to strings for backwards compatibility */
-			if (peek == JsonToken.BOOLEAN) {
-				return Boolean.toString(in.nextBoolean());
-			}
-			return in.nextString();
-		}
-
-		@Override
-		public void write(JsonWriter out, String value) throws IOException {
-			value = value.replaceAll("\\", "\\\\").replaceAll("\"", "\\\"");
-			Loggers.SERVER.info(value);
-			out.value(value);
-		}
-	};
-
-	Gson gson = new GsonBuilder().addDeserializationExclusionStrategy(new SuperclassExclusionStrategy())
-			.addSerializationExclusionStrategy(new SuperclassExclusionStrategy()).setPrettyPrinting()
-			.registerTypeAdapter(String.class, stringAdapter).create();
+	Gson gson = new GsonBuilder()
+			.addDeserializationExclusionStrategy(new SuperclassExclusionStrategy())
+			.addSerializationExclusionStrategy(new SuperclassExclusionStrategy())
+			.create();
 
 	@Override
 	public String getName() {
@@ -69,7 +41,7 @@ public class VelocityToJsonDirective extends Directive {
 			object = node.jjtGetChild(0).value(context);
 			writer.write(gson.toJson(object));
 			return true;
-		}
+        }
 		return false;
 	}
 }
