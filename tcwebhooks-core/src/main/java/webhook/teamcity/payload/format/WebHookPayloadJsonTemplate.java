@@ -3,6 +3,7 @@ package webhook.teamcity.payload.format;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 
+import webhook.teamcity.Loggers;
 import webhook.teamcity.payload.PayloadTemplateEngineType;
 import webhook.teamcity.payload.WebHookContentObjectSerialiser;
 import webhook.teamcity.payload.WebHookPayload;
@@ -83,6 +84,7 @@ public class WebHookPayloadJsonTemplate extends WebHookPayloadGeneric implements
 
 	@Override
 	public Object serialiseObject(Object object) {
+		Loggers.SERVER.error(object.getClass().getName());
 		if (object instanceof Boolean || object instanceof Integer || object instanceof Long) {
 			return object;
 		}
@@ -100,6 +102,7 @@ public class WebHookPayloadJsonTemplate extends WebHookPayloadGeneric implements
 			for (String[] esc : escapes) {
 				string = string.replace(esc[0], esc[1]);
 			}
+			Loggers.SERVER.error(string);
 			return string;
 		}
 		return gson.toJson(object);
