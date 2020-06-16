@@ -156,7 +156,8 @@
 										"BUILD_FIXED" : true,
 									    "BUILD_INTERRUPTED" : false,
 									    "BUILD_PINNED" : false,
-									    "BUILD_UNPINNED" : false
+										"BUILD_UNPINNED" : false,
+										"BUILD_TAGGED": false
 								    }
 								}),
 					success:(function(data){
