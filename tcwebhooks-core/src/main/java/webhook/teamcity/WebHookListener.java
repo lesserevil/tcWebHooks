@@ -339,12 +339,11 @@ public class WebHookListener extends BuildServerAdapter {
 	}
 
 	@Override
-	public void buildTagged(BuildPromotion buildPromotion, SBuild build, User user, String comment) {
+	public void buildTagged(BuildPromotion buildPromotion, SBuild build, User user) {
 		this.processBuildPromotionEvent(
 				build, 
 				BuildStateEnum.BUILD_TAGGED, 
-				user != null ? user.getUsername() : null,
-				comment);
+				user != null ? user.getUsername() : null);
 	}
 	
 	@Override
