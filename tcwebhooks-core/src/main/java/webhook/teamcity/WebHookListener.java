@@ -19,6 +19,7 @@ import jetbrains.buildServer.serverSide.SProject;
 import jetbrains.buildServer.serverSide.SQueuedBuild;
 import jetbrains.buildServer.serverSide.SRunningBuild;
 import jetbrains.buildServer.serverSide.problems.BuildProblemInfo;
+import jetbrains.buildServer.serverSide.BuildPromotion;
 import jetbrains.buildServer.tests.TestName;
 import jetbrains.buildServer.users.User;
 import webhook.WebHook;
@@ -101,6 +102,16 @@ public class WebHookListener extends BuildServerAdapter {
 	}
 	
 	private void processPinEvent(SBuild sBuild, BuildStateEnum state, String user, String comment) {
+		
+		Loggers.SERVER.debug(ABOUT_TO_PROCESS_WEB_HOOKS_FOR + sBuild.getBuildType().getProjectId() + AT_BUILD_STATE + state.getShortName());
+		for (WebHookConfig whc : getListOfEnabledWebHooks(sBuild.getBuildType().getProjectId())){
+			WebHook wh = webHookFactory.getWebHook(whc, myMainSettings.getProxyConfigForUrl(whc.getUrl()));
+			webHookExecutor.execute(wh, whc, sBuild, state, user, comment, false);
+		}
+	}
+
+	// New tag listener, tagsChanged deprecated so use buildPromotionTagsChanged instead
+	private void processBuildPromotionEvent(BuildPromotion buildPromotion, SBuild sBuild, BuildStateEnum state, String user, String comment) {
 		
 		Loggers.SERVER.debug(ABOUT_TO_PROCESS_WEB_HOOKS_FOR + sBuild.getBuildType().getProjectId() + AT_BUILD_STATE + state.getShortName());
 		for (WebHookConfig whc : getListOfEnabledWebHooks(sBuild.getBuildType().getProjectId())){
@@ -323,6 +334,15 @@ public class WebHookListener extends BuildServerAdapter {
 		this.processPinEvent(
 				build, 
 				BuildStateEnum.BUILD_UNPINNED, 
+				user != null ? user.getUsername() : null,
+				comment);
+	}
+
+	@Override
+	public void buildTagged(BuildPromotion buildPromotion, SBuild build, User user, String comment) {
+		this.processBuildPromotionEvent(
+				build, 
+				BuildStateEnum.BUILD_TAGGED, 
 				user != null ? user.getUsername() : null,
 				comment);
 	}

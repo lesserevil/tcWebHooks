@@ -71,6 +71,13 @@ public abstract class WebHookPayloadGeneric implements WebHookPayload {
 	}
 
 	@Override
+	public String buildTagged(SBuild sBuild, SortedMap<String, String> extraParameters, Map<String, String> templates,
+			WebHookTemplateContent webHookTemplate, String username, String comment) {
+		WebHookPayloadContent content = new WebHookPayloadContent(getVariableResolverFactory(), myManager.getServer(), sBuild, BuildStateEnum.BUILD_TAGGED, extraParameters, sBuild.getParametersProvider().getAll(), templates, username, comment);
+		return getStatusAsString(content, webHookTemplate);
+	}
+
+	@Override
 	public String beforeBuildFinish(SBuild runningBuild, SFinishedBuild previousBuild,
 			SortedMap<String,String> extraParameters, Map<String,String> templates, WebHookTemplateContent webHookTemplate) {
 		WebHookPayloadContent content = new WebHookPayloadContent(getVariableResolverFactory(), myManager.getServer(), runningBuild, previousBuild, BuildStateEnum.BEFORE_BUILD_FINISHED, extraParameters, runningBuild.getParametersProvider().getAll(), templates);

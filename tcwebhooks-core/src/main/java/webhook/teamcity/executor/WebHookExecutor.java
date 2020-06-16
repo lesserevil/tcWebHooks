@@ -1,4 +1,4 @@
-package webhook.teamcity.executor;
+BuildStateEnumpackage webhook.teamcity.executor;
 
 import org.jetbrains.annotations.NotNull;
 

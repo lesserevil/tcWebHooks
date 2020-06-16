@@ -144,6 +144,15 @@ public class WebHookContentBuilder {
 				wh.checkFilters(getVariableResolver(variableResolverFactory, state, sBuild, payloadFormat, mergeParameters(whc.getParams(),sBuild, getPreferredDateFormat(templateForThisBuild)), whc.getEnabledTemplates(), username, comment));
 				wh.resolveHeaders(getVariableResolver(variableResolverFactory, state, sBuild, payloadFormat, mergeParameters(whc.getParams(),sBuild, getPreferredDateFormat(templateForThisBuild)), whc.getEnabledTemplates(), username, comment));
 			}
+		} else if (state.equals(BuildStateEnum.BUILD_TAGGED)) {
+			wh.setEnabledForBuildState(state, isOverrideEnabled || (whc.isEnabledForBuildType(sBuild.getBuildType()) && wh.getBuildStates().enabled(state)));
+			if (wh.isEnabled()){
+				templateForThisBuild = findTemplateForState(sBuild, state, whc.getPayloadTemplate());
+				wh.setPayload(payloadFormat.buildUnpinned(sBuild, mergeParameters(whc.getParams(),sBuild, getPreferredDateFormat(templateForThisBuild)), whc.getEnabledTemplates(), templateForThisBuild, username, comment));
+				wh.setUrl(resolveTemplatedUrl(variableResolverFactory, whc.getUrl(), state, sBuild, payloadFormat, mergeParameters(whc.getParams(),sBuild, getPreferredDateFormat(templateForThisBuild)), whc.getEnabledTemplates(), username, comment));
+				wh.checkFilters(getVariableResolver(variableResolverFactory, state, sBuild, payloadFormat, mergeParameters(whc.getParams(),sBuild, getPreferredDateFormat(templateForThisBuild)), whc.getEnabledTemplates(), username, comment));
+				wh.resolveHeaders(getVariableResolver(variableResolverFactory, state, sBuild, payloadFormat, mergeParameters(whc.getParams(),sBuild, getPreferredDateFormat(templateForThisBuild)), whc.getEnabledTemplates(), username, comment));
+			}
 		}
 		return wh;
 	}
