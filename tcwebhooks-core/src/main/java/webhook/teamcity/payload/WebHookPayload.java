@@ -118,11 +118,9 @@ public interface WebHookPayload extends WebHookContentObjectSerialiser {
      * @param extraParameters
      * @param templates
      * @param webHookTemplate
-     * @param username
-     * @return Formatted payload for the WebHook to send for the buildPinned event.
+     * @return Formatted payload for the WebHook to send for the buildTagged event.
      */
-	String buildTagged(SBuild sBuild, SortedMap<String, String> extraParameters, Map<String, String> templates, WebHookTemplateContent webHookTemplate, String username);
-
+	String buildTagged(SBuild sBuild, SortedMap<String, String> extraParameters, Map<String, String> templates, WebHookTemplateContent webHookTemplate);
 
     /**
      * Extracts the required information from the sRunningBuild and extraParameters configured in the webhook
