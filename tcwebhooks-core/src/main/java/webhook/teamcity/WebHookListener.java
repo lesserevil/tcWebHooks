@@ -178,7 +178,6 @@ public class WebHookListener extends BuildServerAdapter {
     	processBuildEvent(sRunningBuild, BuildStateEnum.BEFORE_BUILD_FINISHED);
 	}
 
-	// TODO more changes needed here, check for SBuild or SQueuedBuild then pass getQueuedBuild or getAssociatedBuild
 	// Maybe add checks?
 	@Override
 	public void buildPromotionTagsChanged(BuildPromotion buildPromotion, User user, TagData oldTags, TagData newTags) {
