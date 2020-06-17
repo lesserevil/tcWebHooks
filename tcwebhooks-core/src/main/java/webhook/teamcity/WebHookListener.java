@@ -110,16 +110,6 @@ public class WebHookListener extends BuildServerAdapter {
 		}
 	}
 
-	// New tag listener, tagsChanged deprecated so use buildPromotionTagsChanged instead
-	private void processBuildPromotionEvent(BuildPromotion buildPromotion, SBuild sBuild, BuildStateEnum state, String user, String comment) {
-		
-		Loggers.SERVER.debug(ABOUT_TO_PROCESS_WEB_HOOKS_FOR + sBuild.getBuildType().getProjectId() + AT_BUILD_STATE + state.getShortName());
-		for (WebHookConfig whc : getListOfEnabledWebHooks(sBuild.getBuildType().getProjectId())){
-			WebHook wh = webHookFactory.getWebHook(whc, myMainSettings.getProxyConfigForUrl(whc.getUrl()));
-			webHookExecutor.execute(wh, whc, sBuild, state, user, comment, false);
-		}
-	}
-
 	/** 
 	 * Build a list of Enabled webhooks to pass to the POSTing logic.
 	 * @param projectId
@@ -186,6 +176,13 @@ public class WebHookListener extends BuildServerAdapter {
     @Override
     public void beforeBuildFinish(SRunningBuild sRunningBuild) {
     	processBuildEvent(sRunningBuild, BuildStateEnum.BEFORE_BUILD_FINISHED);
+	}
+
+	// TODO more changes needed here, check for SBuild or SQueuedBuild then pass getQueuedBuild or getAssociatedBuild
+	// Maybe add checks?
+	@Override
+	public void buildPromotionTagsChanged(BuildPromotion buildPromotion, User user, TagData oldTags, TagData newTags) {
+		processBuildEvent(buildPromotion.getAssociatedBuild(), BuildStateEnum.BUILD_TAGGED);
 	}
     
     /**
@@ -336,14 +333,6 @@ public class WebHookListener extends BuildServerAdapter {
 				BuildStateEnum.BUILD_UNPINNED, 
 				user != null ? user.getUsername() : null,
 				comment);
-	}
-
-	@Override
-	public void buildTagged(BuildPromotion buildPromotion, SBuild build, User user) {
-		this.processBuildPromotionEvent(
-				build, 
-				BuildStateEnum.BUILD_TAGGED, 
-				user != null ? user.getUsername() : null);
 	}
 	
 	@Override
