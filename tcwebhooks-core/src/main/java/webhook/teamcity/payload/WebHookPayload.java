@@ -120,7 +120,7 @@ public interface WebHookPayload extends WebHookContentObjectSerialiser {
      * @param webHookTemplate
      * @return Formatted payload for the WebHook to send for the buildPromotionTagsChanged event.
      */
-	String buildPromotionTagsChanged(SBuild sBuild, SortedMap<String, String> extraParameters, Map<String, String> templates, WebHookTemplateContent webHookTemplate);
+	String buildPromotionTagsChanged(SBuild sBuild, SFinishedBuild previousBuild, SortedMap<String,String> extraParameters, Map<String, String> templates, WebHookTemplateContent webHookTemplate);
 
     /**
      * Extracts the required information from the sRunningBuild and extraParameters configured in the webhook
