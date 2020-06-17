@@ -181,7 +181,7 @@ public class WebHookListener extends BuildServerAdapter {
 
 	// Maybe add checks?
 	@Override
-	public void buildPromotionTagsChanged(BuildPromotion buildPromotion, User user, TagData oldTags, TagData newTags) {
+	public void buildPromotionTagsChanged(BuildPromotion buildPromotion, User user, Collection oldTags, Collection newTags) {
 		processBuildEvent(buildPromotion.getAssociatedBuild(), BuildStateEnum.BUILD_TAGGED);
 	}
     
