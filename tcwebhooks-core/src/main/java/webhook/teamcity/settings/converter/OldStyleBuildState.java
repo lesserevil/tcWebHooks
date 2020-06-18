@@ -9,7 +9,8 @@ public final class OldStyleBuildState {
     public static final Integer BUILD_CHANGED_STATUS 	= Integer.parseInt("00000100",2);
     public static final Integer BEFORE_BUILD_FINISHED 	= Integer.parseInt("00001000",2);
     public static final Integer RESPONSIBILITY_CHANGED 	= Integer.parseInt("00010000",2);
-    public static final Integer BUILD_INTERRUPTED 		= Integer.parseInt("00100000",2);
+	public static final Integer BUILD_INTERRUPTED 		= Integer.parseInt("00100000",2);
+	public static final Integer BUILD_TAGGED 			= Integer.parseInt("01000000",2);
     
     public static final Integer ALL_ENABLED				= Integer.parseInt("11111111",2);
     
