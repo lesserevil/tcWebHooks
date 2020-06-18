@@ -146,7 +146,10 @@
 														<input onclick='selectBuildState();' class="buildState" id="responsibilityChanged" name="ResponsibilityChanged" type=checkbox />
 														 Build Responsibility Changed</label>
 													</td>
-													<td></td>
+													<td class="buildPromotionTagsChanged" style="padding-left:3px;"><label style='white-space:nowrap;'>
+														<input onclick='selectBuildState();' class="buildState" id="buildPromotionTagsChanged" name="BuildTagged" type=checkbox />
+														 Build Tagged</label>
+													</td>
 												</tr>
 												<tr style="border:none;"><td>&nbsp;</td>
 													<td class="buildPinned" style="padding-left:3px;"><label style='white-space:nowrap;'>
@@ -222,7 +225,8 @@
 								            			<option value="changesLoaded">Changes Loaded</option>
 								            			<option value="buildInterrupted">Build Interrupted</option>
 								            			<option value="beforeBuildFinish">Build Almost Completed</option>
-								            			<option value="responsibilityChanged">Build Responsibility Changed</option>
+														<option value="responsibilityChanged">Build Responsibility Changed</option>
+														<option value="buildPromotionTagsChanged">Build Tagged</option>
 								            			<option value="buildPinned">Build Pinned</option>
 								            			<option value="buildUnpinned">Build Unpinned</option>
 								            			<option value="buildSuccessful">Build Successful</option>
