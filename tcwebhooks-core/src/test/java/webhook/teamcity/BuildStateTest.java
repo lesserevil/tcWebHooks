@@ -58,6 +58,7 @@ public class BuildStateTest {
 		state.enable(BUILD_SUCCESSFUL);
 		state.enable(BUILD_PINNED);
 		state.enable(BUILD_UNPINNED);
+		state.enable(BUILD_TAGGED);
 		assertTrue(state.allEnabled());
 	}
 
