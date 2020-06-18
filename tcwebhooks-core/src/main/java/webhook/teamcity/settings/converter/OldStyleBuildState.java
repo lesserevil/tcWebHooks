@@ -41,6 +41,7 @@ public final class OldStyleBuildState {
 		if (stateInt.equals(BEFORE_BUILD_FINISHED)) {	return "beforeBuildFinish"; }
 		if (stateInt.equals(RESPONSIBILITY_CHANGED)){ 	return "responsibilityChanged"; }
 		if (stateInt.equals(BUILD_INTERRUPTED))		{ 	return "buildInterrupted"; }
+		if (stateInt.equals(BUILD_TAGGED))			{	return "buildPromotionTagsChanged";}
 		return null;
 	}
 	
@@ -58,6 +59,7 @@ public final class OldStyleBuildState {
 		if (stateInt.equals(BEFORE_BUILD_FINISHED)) {	 return "nearly finished"; }
 		if (stateInt.equals(RESPONSIBILITY_CHANGED)){	 return "changed responsibility"; }
 		if (stateInt.equals(BUILD_INTERRUPTED)) 	{	 return "been interrupted"; }
+		if (stateInt.equals(BUILD_TAGGED))			{	 return "been tagged";}
 		return null;
 	}
     
