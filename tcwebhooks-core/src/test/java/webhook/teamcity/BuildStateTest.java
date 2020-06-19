@@ -70,6 +70,7 @@ public class BuildStateTest {
 		state.enable(BEFORE_BUILD_FINISHED);
 		state.enable(BUILD_FINISHED);
 		state.enable(BUILD_SUCCESSFUL);
+		state.enable(BUILD_TAGGED);
 		assertFalse(state.allEnabled());
 	}
 	
@@ -84,6 +85,7 @@ public class BuildStateTest {
 		state.enable(BUILD_FAILED);
 		state.enable(BUILD_SUCCESSFUL);
 		state.enable(BUILD_BROKEN);
+		state.enable(BUILD_TAGGED);
 		assertFalse(state.allEnabled());
 	}
 	
@@ -98,6 +100,7 @@ public class BuildStateTest {
 		state.enable(BUILD_FAILED);
 		state.enable(BUILD_SUCCESSFUL);
 		state.enable(BUILD_FIXED);
+		state.enable(BUILD_TAGGED);
 		assertFalse(state.allEnabled());
 	}
 	
@@ -113,6 +116,7 @@ public class BuildStateTest {
 		state.enable(BUILD_SUCCESSFUL);
 		state.enable(BUILD_FIXED);
 		state.enable(BUILD_BROKEN);
+		state.enable(BUILD_TAGGED);
 		assertFalse(state.allEnabled());
 	}
 	
@@ -128,6 +132,7 @@ public class BuildStateTest {
 		state.enable(BUILD_SUCCESSFUL);
 		state.enable(BUILD_FIXED);
 		state.enable(BUILD_BROKEN);
+		state.enable(BUILD_TAGGED);
 		assertFalse(state.noneEnabled());
 	}
 
@@ -143,6 +148,7 @@ public class BuildStateTest {
 		state.enable(BUILD_SUCCESSFUL);
 		state.enable(BUILD_FIXED);
 		state.enable(BUILD_BROKEN);
+		state.enable(BUILD_TAGGED);
 		assertTrue(state.noneEnabled());
 	}
 	
@@ -158,6 +164,7 @@ public class BuildStateTest {
 		state.disable(BUILD_SUCCESSFUL);
 		state.disable(BUILD_FIXED);
 		state.disable(BUILD_BROKEN);
+		state.disable(BUILD_TAGGED);
 		assertTrue(state.noneEnabled());
 	}
 	
@@ -173,6 +180,7 @@ public class BuildStateTest {
 		state.disable(BUILD_SUCCESSFUL);
 		state.disable(BUILD_FIXED);
 		state.disable(BUILD_BROKEN);
+		state.disable(BUILD_TAGGED);
 		assertTrue(state.noneEnabled());
 	}
 	
@@ -188,6 +196,7 @@ public class BuildStateTest {
 		state.disable(BUILD_SUCCESSFUL);
 		state.disable(BUILD_FIXED);
 		state.disable(BUILD_BROKEN);
+		state.disable(BUILD_TAGGED);
 		assertFalse(state.noneEnabled());
 	}
 
