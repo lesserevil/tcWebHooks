@@ -148,7 +148,7 @@ public class BuildStateTest {
 		state.enable(BUILD_SUCCESSFUL);
 		state.enable(BUILD_FIXED);
 		state.enable(BUILD_BROKEN);
-		state.enable(BUILD_TAGGED);
+		state.disable(BUILD_TAGGED);
 		assertTrue(state.noneEnabled());
 	}
 	
