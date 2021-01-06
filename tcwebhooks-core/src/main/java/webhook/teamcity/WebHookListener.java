@@ -111,6 +111,15 @@ public class WebHookListener extends BuildServerAdapter {
 		}
 	}
 
+	private void processTagEvent(SBuild sBuild, BuildStateEnum state, String user, String comment) {
+		
+		Loggers.SERVER.debug(ABOUT_TO_PROCESS_WEB_HOOKS_FOR + sBuild.getBuildType().getProjectId() + AT_BUILD_STATE + state.getShortName());
+		for (WebHookConfig whc : getListOfEnabledWebHooks(sBuild.getBuildType().getProjectId())){
+			WebHook wh = webHookFactory.getWebHook(whc, myMainSettings.getProxyConfigForUrl(whc.getUrl()));
+			webHookExecutor.execute(wh, whc, sBuild, state, user, comment, false);
+		}
+	}
+
 	/** 
 	 * Build a list of Enabled webhooks to pass to the POSTing logic.
 	 * @param projectId
