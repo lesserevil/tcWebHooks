@@ -150,9 +150,9 @@ public class WebHookContentBuilder {
 			if (wh.isEnabled()){
 				templateForThisBuild = findTemplateForState(sBuild, state, whc.getPayloadTemplate());
 				wh.setPayload(payloadFormat.buildPromotionTagsChanged(sBuild, getPreviousNonPersonalBuild(wh, sBuild), mergeParameters(whc.getParams(),sBuild, getPreferredDateFormat(templateForThisBuild)), whc.getEnabledTemplates(), templateForThisBuild));
-				wh.setUrl(resolveTemplatedUrl(variableResolverFactory, whc.getUrl(), state, sBuild, payloadFormat, mergeParameters(whc.getParams(),sBuild, getPreferredDateFormat(templateForThisBuild)), whc.getEnabledTemplates());
-				wh.checkFilters(getVariableResolver(variableResolverFactory, state, sBuild, payloadFormat, mergeParameters(whc.getParams(),sBuild, getPreferredDateFormat(templateForThisBuild)), whc.getEnabledTemplates());
-				wh.resolveHeaders(getVariableResolver(variableResolverFactory, state, sBuild, payloadFormat, mergeParameters(whc.getParams(),sBuild, getPreferredDateFormat(templateForThisBuild)), whc.getEnabledTemplates());
+				wh.setUrl(resolveTemplatedUrl(variableResolverFactory, whc.getUrl(), state, sBuild, payloadFormat, mergeParameters(whc.getParams(),sBuild, getPreferredDateFormat(templateForThisBuild)), whc.getEnabledTemplates()));
+				wh.checkFilters(getVariableResolver(variableResolverFactory, state, sBuild, payloadFormat, mergeParameters(whc.getParams(),sBuild, getPreferredDateFormat(templateForThisBuild)), whc.getEnabledTemplates()));
+				wh.resolveHeaders(getVariableResolver(variableResolverFactory, state, sBuild, payloadFormat, mergeParameters(whc.getParams(),sBuild, getPreferredDateFormat(templateForThisBuild)), whc.getEnabledTemplates()));
 			}
 		}
 		return wh;
