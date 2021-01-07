@@ -188,10 +188,13 @@ public class WebHookListener extends BuildServerAdapter {
     	processBuildEvent(sRunningBuild, BuildStateEnum.BEFORE_BUILD_FINISHED);
 	}
 
-	// Maybe add checks?
+	// Updating build tag is a DELETE and CREATE event in teamcity, there is no UPDATE. 
+	// We don't care when teamcity clears build tags behind the scenes.  
 	@Override
-	public void buildPromotionTagsChanged(BuildPromotion buildPromotion, User user, Collection oldTags, @NotNull Collection newTags) {
-		processBuildEvent(buildPromotion.getAssociatedBuild(), BuildStateEnum.BUILD_TAGGED);
+	public void buildPromotionTagsChanged(BuildPromotion buildPromotion, User user, Collection oldTags, Collection newTags) {
+		if (newTags != null && !newTags.isEmpty()) {
+			this.processBuildEvent(buildPromotion.getAssociatedBuild(), BuildStateEnum.BUILD_TAGGED);
+		}
 	}
     
     /**
