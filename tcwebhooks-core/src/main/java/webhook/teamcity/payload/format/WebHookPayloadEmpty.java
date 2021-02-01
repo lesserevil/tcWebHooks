@@ -53,7 +53,7 @@ public class WebHookPayloadEmpty implements WebHookPayload, WebHookContentObject
 	}
 
 	@Override
-	public String buildPromotionTagsChanged(SBuild sBuild, 
+	public String buildTagsChanged(SBuild sBuild, 
 			SFinishedBuild previousBuild,
 			SortedMap<String,String> extraParameters, Map<String,String> templates, WebHookTemplateContent webHookTemplate) {
 		return "";
